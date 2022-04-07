@@ -41,6 +41,7 @@ namespace ReconNessAgent.Worker
                 this.channel = conn.CreateModel();
 
                 this.channel.ExchangeDeclare("reconness", ExchangeType.Direct);
+                this.channel.QueueDeclare("reconness-queue");
             }
             catch (Exception ex)
             {
