@@ -19,10 +19,10 @@ namespace ReconNessAgent.Worker
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            this.agentRunnerQueueProvider.Consumer();
+        {            
             while (!stoppingToken.IsCancellationRequested)
             {
+                this.agentRunnerQueueProvider.Consumer();
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 await Task.Delay(1000, stoppingToken);
             }
