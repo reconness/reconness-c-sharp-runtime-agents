@@ -38,7 +38,9 @@ namespace ReconNessAgent.Worker
 
                 var conn = factory.CreateConnection();
 
-                this.channel = conn.CreateModel();                
+                this.channel = conn.CreateModel();
+
+                this.channel.ExchangeDeclare("reconness", ExchangeType.Direct);
             }
             catch (Exception ex)
             {
