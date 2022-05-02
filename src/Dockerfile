@@ -5,10 +5,13 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0.100-bullseye-slim AS build
 WORKDIR /src
-COPY ["ReconNessAgent.Worker/ReconNessAgent.Worker.csproj", "ReconNessAgent.Worker/"]
-RUN dotnet restore "ReconNessAgent.Worker/ReconNessAgent.Worker.csproj"
+COPY ["Domain/ReconNessAgent.Domain/ReconNessAgent.Domain.Core.csproj", "Domain/ReconNessAgent.Domain/"]
+COPY ["Application/ReconNessAgent.Application/ReconNessAgent.Application.csproj", "Application/ReconNessAgent.Application/"]
+COPY ["Infrestructure/ReconNessAgent.Data.Dapper/ReconNessAgent.Data.Dapper.csproj", "Infrestructure/ReconNessAgent.Data.Dapper/"]
+COPY ["Infrestructure/ReconNessAgent.Worker/ReconNessAgent.Worker.csproj", "Infrestructure/ReconNessAgent.Worker/"]
+RUN dotnet restore "Infrestructure/ReconNessAgent.Worker/ReconNessAgent.Worker.csproj"
 COPY . .
-WORKDIR "/src/ReconNessAgent.Worker"
+WORKDIR "/src/Infrestructure/ReconNessAgent.Worker"
 RUN dotnet build "ReconNessAgent.Worker.csproj" -c Release -o /app/build
 
 FROM build AS publish
