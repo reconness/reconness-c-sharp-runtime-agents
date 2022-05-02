@@ -4,6 +4,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ReconNessAgent.Worker
 {
@@ -13,6 +14,8 @@ namespace ReconNessAgent.Worker
         private readonly ILogger<Worker> _logger;
 
         private IModel channel;
+
+        private string queueName;
 
         public AgentRunnerQueueProvider(IConfiguration configuration, ILogger<Worker> _logger)
         {
@@ -34,14 +37,25 @@ namespace ReconNessAgent.Worker
                 rabbitmqConnectionString = rabbitmqConnectionString.Replace("{{username}}", rabbitMQUserName)
                                                                    .Replace("{{password}}", rabbitMQPassword);
 
-                var factory = new ConnectionFactory() { Uri = new Uri(rabbitmqConnectionString) };
+                var reconnessAgentOrderFromEnv = Environment.GetEnvironmentVariable("ReconnessAgentOrder") ??
+                             Environment.GetEnvironmentVariable("ReconnessAgentOrder", EnvironmentVariableTarget.User);
+
+                if(!int.TryParse(reconnessAgentOrderFromEnv, out int reconnessAgentOrder))
+                {
+                    reconnessAgentOrder = 1;
+                }
+
+                var factory = new ConnectionFactory() { Uri = new Uri(rabbitmqConnectionString), DispatchConsumersAsync = true };
 
                 var conn = factory.CreateConnection();
-
+                
                 this.channel = conn.CreateModel();
+                
+                this.channel.ExchangeDeclare("reconness", ExchangeType.Direct);   
+                var queue = this.channel.QueueDeclare("");
+                this.queueName = queue.QueueName;
 
-                this.channel.ExchangeDeclare("reconness", ExchangeType.Direct);
-                this.channel.QueueDeclare("reconness-queue");
+                this.channel.QueueBind(this.queueName, "reconness", $"reconness-{reconnessAgentOrder}");
             }
             catch (Exception ex)
             {
@@ -57,17 +71,20 @@ namespace ReconNessAgent.Worker
                 this.Start();
                 if (this.channel != null)
                 {
-                    var consumer = new EventingBasicConsumer(this.channel);
-                    consumer.Received += (ch, ea) =>
+                    var consumer = new AsyncEventingBasicConsumer(this.channel);
+                    consumer.Received += async (ch, ea) =>
                     {
                         var body = ea.Body.ToArray();
                         if (body != null)
+                        {
                             _logger.LogInformation(Encoding.UTF8.GetString(body));
+                            await Task.Delay(10000);
+                        }
 
                         channel.BasicAck(ea.DeliveryTag, false);
                     };
 
-                    channel.BasicConsume("reconness-queue", false, consumer);
+                    channel.BasicConsume(this.queueName, false, consumer);
                 }
             }
         }
