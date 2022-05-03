@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReconNessAgent.Data.Dapper"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReconNessAgent.Worker", "Infrestructure\ReconNessAgent.Worker\ReconNessAgent.Worker.csproj", "{4E982C59-A94E-426F-914B-3E42E56EC0C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReconNessAgent.PubSub", "Infrestructure\ReconNessAgent.PubSub\ReconNessAgent.PubSub.csproj", "{B5849207-2786-4E4D-8C2B-A453F04F7026}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{4E982C59-A94E-426F-914B-3E42E56EC0C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E982C59-A94E-426F-914B-3E42E56EC0C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E982C59-A94E-426F-914B-3E42E56EC0C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5849207-2786-4E4D-8C2B-A453F04F7026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5849207-2786-4E4D-8C2B-A453F04F7026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5849207-2786-4E4D-8C2B-A453F04F7026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5849207-2786-4E4D-8C2B-A453F04F7026}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{8C1EBBC5-BF72-4F56-9083-C3CC5F20A6D5} = {114A7F69-FB8F-451F-9AEC-6F849924D062}
 		{0D0C1FD1-10F2-47B0-9188-57CC991638CD} = {450DAD9F-B161-49C7-A07A-594D090852CD}
 		{4E982C59-A94E-426F-914B-3E42E56EC0C3} = {450DAD9F-B161-49C7-A07A-594D090852CD}
+		{B5849207-2786-4E4D-8C2B-A453F04F7026} = {450DAD9F-B161-49C7-A07A-594D090852CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {31641696-15E4-49C4-9239-23242447B790}

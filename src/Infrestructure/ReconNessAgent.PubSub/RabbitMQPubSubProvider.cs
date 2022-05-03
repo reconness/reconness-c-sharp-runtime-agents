@@ -1,33 +1,33 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Options;
+using NLog;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
+using ReconNessAgent.Application;
+using ReconNessAgent.Application.Models;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace ReconNessAgent.Worker
+namespace ReconNessAgent.PubSub
 {
-    internal class AgentRunnerQueueProvider
+    public class RabbitMQPubSubProvider : IPubSubProvider
     {
-        private readonly IConfiguration configuration;
-        private readonly ILogger<Worker> _logger;
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+        private readonly PubSubOptions options;
 
         private IModel channel;
 
         private string queueName;
 
-        public AgentRunnerQueueProvider(IConfiguration configuration, ILogger<Worker> _logger)
+        public RabbitMQPubSubProvider(IOptions<PubSubOptions> options)
         {
-            this.configuration = configuration;
-            this._logger = _logger;
+            this.options = options.Value;
         }
 
         public void Start()
         {
             try
             {
-                var rabbitmqConnectionString = this.configuration.GetConnectionString("DefaultRabbitmqConnection");
+                var rabbitmqConnectionString = this.options.ConnectionString;
 
                 var rabbitMQUserName = Environment.GetEnvironmentVariable("RabbitMQUser") ??
                                      Environment.GetEnvironmentVariable("RabbitMQUser", EnvironmentVariableTarget.User);
@@ -40,7 +40,7 @@ namespace ReconNessAgent.Worker
                 var reconnessAgentOrderFromEnv = Environment.GetEnvironmentVariable("ReconnessAgentOrder") ??
                              Environment.GetEnvironmentVariable("ReconnessAgentOrder", EnvironmentVariableTarget.User);
 
-                if(!int.TryParse(reconnessAgentOrderFromEnv, out int reconnessAgentOrder))
+                if (!int.TryParse(reconnessAgentOrderFromEnv, out int reconnessAgentOrder))
                 {
                     reconnessAgentOrder = 1;
                 }
@@ -48,10 +48,10 @@ namespace ReconNessAgent.Worker
                 var factory = new ConnectionFactory() { Uri = new Uri(rabbitmqConnectionString), DispatchConsumersAsync = true };
 
                 var conn = factory.CreateConnection();
-                
+
                 this.channel = conn.CreateModel();
-                
-                this.channel.ExchangeDeclare("reconness", ExchangeType.Direct);   
+
+                this.channel.ExchangeDeclare("reconness", ExchangeType.Direct);
                 var queue = this.channel.QueueDeclare("");
                 this.queueName = queue.QueueName;
 
@@ -59,13 +59,13 @@ namespace ReconNessAgent.Worker
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.Error(ex.Message);
                 this.channel = null;
             }
         }
 
         public void Consumer()
-        {            
+        {
             if (this.channel == null)
             {
                 this.Start();
@@ -77,7 +77,7 @@ namespace ReconNessAgent.Worker
                         var body = ea.Body.ToArray();
                         if (body != null)
                         {
-                            _logger.LogInformation(Encoding.UTF8.GetString(body));
+                            _logger.Info(Encoding.UTF8.GetString(body));
                             await Task.Delay(10000);
                         }
 
