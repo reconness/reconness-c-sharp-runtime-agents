@@ -8,6 +8,7 @@ WORKDIR /src
 COPY ["Domain/ReconNessAgent.Domain.Core/ReconNessAgent.Domain.Core.csproj", "Domain/ReconNessAgent.Domain.Core/"]
 COPY ["Application/ReconNessAgent.Application/ReconNessAgent.Application.csproj", "Application/ReconNessAgent.Application/"]
 COPY ["Infrestructure/ReconNessAgent.Data.Dapper/ReconNessAgent.Data.Dapper.csproj", "Infrestructure/ReconNessAgent.Data.Dapper/"]
+COPY ["Infrestructure/ReconNessAgent.PubSub/ReconNessAgent.PubSub.csproj", "Infrestructure/ReconNessAgent.PubSub/"]
 COPY ["Infrestructure/ReconNessAgent.Worker/ReconNessAgent.Worker.csproj", "Infrestructure/ReconNessAgent.Worker/"]
 RUN dotnet restore "Infrestructure/ReconNessAgent.Worker/ReconNessAgent.Worker.csproj"
 COPY . .
