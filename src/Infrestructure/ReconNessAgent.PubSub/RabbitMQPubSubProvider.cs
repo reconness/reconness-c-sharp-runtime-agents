@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Options;
-using NLog;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using ReconNessAgent.Application;
 using ReconNessAgent.Application.Models;
+using Serilog;
 using System.Text;
 
 namespace ReconNessAgent.PubSub
 {
     public class RabbitMQPubSubProvider : IPubSubProvider
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = Log.ForContext<RabbitMQPubSubProvider>();
 
         private readonly PubSubOptions options;
 
@@ -77,7 +77,7 @@ namespace ReconNessAgent.PubSub
                         var body = ea.Body.ToArray();
                         if (body != null)
                         {
-                            _logger.Info(Encoding.UTF8.GetString(body));
+                            _logger.Information(Encoding.UTF8.GetString(body));
                             await Task.Delay(10000);
                         }
 

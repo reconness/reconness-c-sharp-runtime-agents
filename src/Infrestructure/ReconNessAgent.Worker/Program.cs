@@ -3,6 +3,8 @@ using Microsoft.Extensions.Hosting;
 using ReconNessAgent.Application;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.PubSub;
+using Serilog;
+using System;
 
 namespace ReconNessAgent.Worker
 {
@@ -10,7 +12,24 @@ namespace ReconNessAgent.Worker
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
+
+            try
+            {
+                CreateHostBuilder(args)
+                    .Build()
+                    .Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Worker service failed initiation. See exception for more details");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -21,8 +40,13 @@ namespace ReconNessAgent.Worker
                     services.Configure<PubSubOptions>(
                         configurationRoot.GetSection("PubSub"));
 
-                    services.AddScoped<IPubSubProvider, RabbitMQPubSubProvider>();
+                    services.AddSingleton<IPubSubProvider, RabbitMQPubSubProvider>();
                     services.AddHostedService<Worker>();
-                });
+                })
+                .ConfigureLogging((hostContext, builder) =>
+                {
+                    builder.ConfigureSerilog(hostContext.Configuration);
+                })
+                .UseSerilog();
     }
 }

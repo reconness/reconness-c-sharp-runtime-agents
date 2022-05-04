@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting;
-using NLog;
 using ReconNessAgent.Application;
+using Serilog;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ namespace ReconNessAgent.Worker
 {
     public class Worker : BackgroundService
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = Log.ForContext<Worker>();
 
         private readonly IPubSubProvider pubSubProvider;
 
@@ -24,7 +24,7 @@ namespace ReconNessAgent.Worker
             {
                 this.pubSubProvider.Consumer();
 
-                _logger.Info("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.Information("Worker running at: {time}", DateTimeOffset.Now);
                 await Task.Delay(10000, stoppingToken);
             }
         }
