@@ -22,7 +22,7 @@ namespace ReconNessAgent.Worker
         {            
             while (!stoppingToken.IsCancellationRequested)
             {
-                this.pubSubProvider.Consumer();
+                await this.pubSubProvider.ConsumerAsync(stoppingToken);
 
                 _logger.Information("Worker running at: {time}", DateTimeOffset.Now);
                 await Task.Delay(10000, stoppingToken);

@@ -2,6 +2,6 @@
 {
     public interface IPubSubProvider
     {
-        void Consumer();
+        Task ConsumerAsync(CancellationToken stoppingToken);
     }
 }

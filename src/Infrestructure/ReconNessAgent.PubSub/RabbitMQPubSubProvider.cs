@@ -3,6 +3,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using ReconNessAgent.Application;
 using ReconNessAgent.Application.Models;
+using ReconNessAgent.Application.Services;
 using Serilog;
 using System.Text;
 
@@ -13,17 +14,70 @@ namespace ReconNessAgent.PubSub
         private static readonly ILogger _logger = Log.ForContext<RabbitMQPubSubProvider>();
 
         private readonly PubSubOptions options;
+        private readonly IProcessService processService;
 
-        private IModel channel;
+        private IModel? channel;
 
-        private string queueName;
+        private string? queueName;
 
-        public RabbitMQPubSubProvider(IOptions<PubSubOptions> options)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="processService"><see cref="IProcessService"/></param>
+        /// <param name="options">The configuraion options</param>
+        public RabbitMQPubSubProvider(IProcessService processService, IOptions<PubSubOptions> options)
         {
+            this.processService = processService;
             this.options = options.Value;
         }
 
-        public void Start()
+        public Task ConsumerAsync(CancellationToken stoppingToken)
+        {
+            if (this.channel == null)
+            {
+                this.InitializeChannel();
+
+                this.SubscribeConsumerEvent(stoppingToken);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void SubscribeConsumerEvent(CancellationToken cancellationToken)
+        {
+            if (this.channel != null)
+            {
+                var consumer = new AsyncEventingBasicConsumer(this.channel);
+                consumer.Received += async (ch, ea) =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    var body = ea.Body.ToArray();
+                    if (body != null)
+                    {
+                        var agentInfoJson = Encoding.UTF8.GetString(body);
+                        await this.processService.ExecuteAsync(agentInfoJson, cancellationToken);
+
+                        _logger.Information(agentInfoJson);
+                    }
+
+                    channel.BasicAck(ea.DeliveryTag, false);
+                };
+
+                channel.BasicConsume(this.queueName, false, consumer);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void InitializeChannel()
         {
             try
             {
@@ -61,31 +115,6 @@ namespace ReconNessAgent.PubSub
             {
                 _logger.Error(ex.Message);
                 this.channel = null;
-            }
-        }
-
-        public void Consumer()
-        {
-            if (this.channel == null)
-            {
-                this.Start();
-                if (this.channel != null)
-                {
-                    var consumer = new AsyncEventingBasicConsumer(this.channel);
-                    consumer.Received += async (ch, ea) =>
-                    {
-                        var body = ea.Body.ToArray();
-                        if (body != null)
-                        {
-                            _logger.Information(Encoding.UTF8.GetString(body));
-                            await Task.Delay(10000);
-                        }
-
-                        channel.BasicAck(ea.DeliveryTag, false);
-                    };
-
-                    channel.BasicConsume(this.queueName, false, consumer);
-                }
             }
         }
     }

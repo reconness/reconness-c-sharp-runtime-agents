@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ReconNessAgent.Application;
 using ReconNessAgent.Application.Models;
+using ReconNessAgent.Application.Services;
 using ReconNessAgent.PubSub;
 using Serilog;
 using System;
@@ -40,7 +41,9 @@ namespace ReconNessAgent.Worker
                     services.Configure<PubSubOptions>(
                         configurationRoot.GetSection("PubSub"));
 
+                    services.AddSingleton<IProcessService, ProcessService>();
                     services.AddSingleton<IPubSubProvider, RabbitMQPubSubProvider>();
+
                     services.AddHostedService<Worker>();
                 })
                 .ConfigureLogging((hostContext, builder) =>
