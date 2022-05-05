@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Serilog;
 
-namespace ReconNessAgent.Worker
+namespace ReconNessAgent.Infrastructure.Worker
 {
     public static class LoggingBuilderExtensions
     {

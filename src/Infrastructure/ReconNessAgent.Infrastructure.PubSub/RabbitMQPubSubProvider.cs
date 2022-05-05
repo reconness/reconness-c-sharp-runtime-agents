@@ -3,11 +3,11 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using ReconNessAgent.Application;
 using ReconNessAgent.Application.Models;
-using ReconNessAgent.Application.Services;
+using ReconNessAgent.Application.Providers;
 using Serilog;
 using System.Text;
 
-namespace ReconNessAgent.PubSub
+namespace ReconNessAgent.Infrastructure.PubSub
 {
     public class RabbitMQPubSubProvider : IPubSubProvider
     {

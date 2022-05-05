@@ -1,4 +1,4 @@
-﻿namespace ReconNessAgent.Application.Services
+﻿namespace ReconNessAgent.Application
 {
     public interface IProcessService
     {

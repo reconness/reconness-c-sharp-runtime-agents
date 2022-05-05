@@ -1,4 +1,4 @@
-﻿namespace ReconNessAgent.Application
+﻿namespace ReconNessAgent.Application.Providers
 {
     public interface IPubSubProvider
     {

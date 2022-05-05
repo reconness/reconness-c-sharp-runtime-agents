@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -17,9 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Application\ReconNessAgent.Application.Services\ReconNessAgent.Application.Services.csproj" />
     <ProjectReference Include="..\..\Application\ReconNessAgent.Application\ReconNessAgent.Application.csproj" />
     <ProjectReference Include="..\..\Domain\ReconNessAgent.Domain.Core\ReconNessAgent.Domain.Core.csproj" />
-    <ProjectReference Include="..\ReconNessAgent.Data.Dapper\ReconNessAgent.Data.Dapper.csproj" />
-    <ProjectReference Include="..\ReconNessAgent.PubSub\ReconNessAgent.PubSub.csproj" />
+    <ProjectReference Include="..\ReconNessAgent.Infrastructure.Data.Dapper\ReconNessAgent.Infrastructure.Data.Dapper.csproj" />
+    <ProjectReference Include="..\ReconNessAgent.Infrastructure.PubSub\ReconNessAgent.Infrastructure.PubSub.csproj" />
+    <ProjectReference Include="..\ReconNessAgent.Infrastructure\ReconNessAgent.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

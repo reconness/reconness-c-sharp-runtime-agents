@@ -2,12 +2,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ReconNessAgent.Application;
 using ReconNessAgent.Application.Models;
+using ReconNessAgent.Application.Providers;
 using ReconNessAgent.Application.Services;
-using ReconNessAgent.PubSub;
+using ReconNessAgent.Infrastructure.PubSub;
 using Serilog;
 using System;
 
-namespace ReconNessAgent.Worker
+namespace ReconNessAgent.Infrastructure.Worker
 {
     public class Program
     {
@@ -41,6 +42,7 @@ namespace ReconNessAgent.Worker
                     services.Configure<PubSubOptions>(
                         configurationRoot.GetSection("PubSub"));
 
+                    services.AddSingleton<IScriptEngineProvider, ScriptEngineProvider>();
                     services.AddSingleton<IProcessService, ProcessService>();
                     services.AddSingleton<IPubSubProvider, RabbitMQPubSubProvider>();
 

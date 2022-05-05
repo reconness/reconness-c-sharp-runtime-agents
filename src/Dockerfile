@@ -7,18 +7,20 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0.100-bullseye-slim AS build
 WORKDIR /src
 COPY ["Domain/ReconNessAgent.Domain.Core/ReconNessAgent.Domain.Core.csproj", "Domain/ReconNessAgent.Domain.Core/"]
 COPY ["Application/ReconNessAgent.Application/ReconNessAgent.Application.csproj", "Application/ReconNessAgent.Application/"]
-COPY ["Infrestructure/ReconNessAgent.Data.Dapper/ReconNessAgent.Data.Dapper.csproj", "Infrestructure/ReconNessAgent.Data.Dapper/"]
-COPY ["Infrestructure/ReconNessAgent.PubSub/ReconNessAgent.PubSub.csproj", "Infrestructure/ReconNessAgent.PubSub/"]
-COPY ["Infrestructure/ReconNessAgent.Worker/ReconNessAgent.Worker.csproj", "Infrestructure/ReconNessAgent.Worker/"]
-RUN dotnet restore "Infrestructure/ReconNessAgent.Worker/ReconNessAgent.Worker.csproj"
+COPY ["Application/ReconNessAgent.Application.Services/ReconNessAgent.Application.Services.csproj", "Application/ReconNessAgent.Application.Services/"]
+COPY ["Infrastructure/ReconNessAgent.Infrastructure/ReconNessAgent.Infrastructure.csproj", "Infrastructure/ReconNessAgent.Infrastructure/"]
+COPY ["Infrastructure/ReconNessAgent.Infrastructure.Data.Dapper/ReconNessAgent.Infrastructure.Data.Dapper.csproj", "Infrastructure/ReconNessAgent.Infrastructure.Data.Dapper/"]
+COPY ["Infrastructure/ReconNessAgent.Infrastructure.PubSub/ReconNessAgent.Infrastructure.PubSub.csproj", "Infrastructure/ReconNessAgent.Infrastructure.PubSub/"]
+COPY ["Infrastructure/ReconNessAgent.Infrastructure.Worker/ReconNessAgent.Infrastructure.Worker.csproj", "Infrastructure/ReconNessAgent.Infrastructure.Worker/"]
+RUN dotnet restore "Infrastructure/ReconNessAgent.Infrastructure.Worker/ReconNessAgent.Infrastructure.Worker.csproj"
 COPY . .
-WORKDIR "/src/Infrestructure/ReconNessAgent.Worker"
-RUN dotnet build "ReconNessAgent.Worker.csproj" -c Release -o /app/build
+WORKDIR "/src/Infrastructure/ReconNessAgent.Infrastructure.Worker"
+RUN dotnet build "ReconNessAgent.Infrastructure.Worker.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "ReconNessAgent.Worker.csproj" -c Release -o /app/publish
+RUN dotnet publish "ReconNessAgent.Infrastructure.Worker.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ReconNessAgent.Worker.dll"]
+ENTRYPOINT ["dotnet", "ReconNessAgent.Infrastructure.Worker.dll"]
