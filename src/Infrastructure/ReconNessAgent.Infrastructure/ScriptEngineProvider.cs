@@ -12,7 +12,7 @@ public class ScriptEngineProvider : IScriptEngineProvider
     private static readonly ILogger _logger = Log.ForContext<ScriptEngineProvider>();
 
     /// <inheritdoc/>
-    public async Task<ScriptOutput> TerminalOutputParseAsync(string script, string lineInput, int lineInputCount, CancellationToken cancellationToken = default)
+    public async Task<ScriptOutput> ParseAsync(string script, string lineInput, int lineInputCount, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 

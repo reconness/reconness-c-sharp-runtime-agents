@@ -1,7 +1,6 @@
-﻿namespace ReconNessAgent.Application.Providers
+﻿namespace ReconNessAgent.Application.Providers;
+public interface IPubSubProvider
 {
-    public interface IPubSubProvider
-    {
-        Task ConsumerAsync(CancellationToken stoppingToken);
-    }
+    Task ConsumerAsync(CancellationToken stoppingToken);
 }
+

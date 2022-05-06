@@ -14,7 +14,7 @@ namespace ReconNessAgent.Infrastructure.PubSub
         private static readonly ILogger _logger = Log.ForContext<RabbitMQPubSubProvider>();
 
         private readonly PubSubOptions options;
-        private readonly IProcessService processService;
+        private readonly IAgentService processService;
 
         private IModel? channel;
 
@@ -23,9 +23,9 @@ namespace ReconNessAgent.Infrastructure.PubSub
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="processService"><see cref="IProcessService"/></param>
+        /// <param name="processService"><see cref="IAgentService"/></param>
         /// <param name="options">The configuraion options</param>
-        public RabbitMQPubSubProvider(IProcessService processService, IOptions<PubSubOptions> options)
+        public RabbitMQPubSubProvider(IAgentService processService, IOptions<PubSubOptions> options)
         {
             this.processService = processService;
             this.options = options.Value;
@@ -62,7 +62,7 @@ namespace ReconNessAgent.Infrastructure.PubSub
                     if (body != null)
                     {
                         var agentInfoJson = Encoding.UTF8.GetString(body);
-                        await this.processService.ExecuteAsync(agentInfoJson, cancellationToken);
+                        await this.processService.RunAsync(agentInfoJson, cancellationToken);
 
                         _logger.Information(agentInfoJson);
                     }

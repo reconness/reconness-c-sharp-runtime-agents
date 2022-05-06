@@ -42,8 +42,9 @@ namespace ReconNessAgent.Infrastructure.Worker
                     services.Configure<PubSubOptions>(
                         configurationRoot.GetSection("PubSub"));
 
+                    services.AddSingleton<IProcessProviderFactory, ProcessProviderFactory>();
                     services.AddSingleton<IScriptEngineProvider, ScriptEngineProvider>();
-                    services.AddSingleton<IProcessService, ProcessService>();
+                    services.AddSingleton<IAgentService, AgentService>();
                     services.AddSingleton<IPubSubProvider, RabbitMQPubSubProvider>();
 
                     services.AddHostedService<Worker>();
