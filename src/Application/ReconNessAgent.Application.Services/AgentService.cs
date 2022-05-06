@@ -36,7 +36,7 @@ public class AgentService : IAgentService
 
                 // check channel status if the agent stopped break and stop the process on AgentRunner
 
-                var terminalLineOutput = process.ReadLine();
+                var terminalLineOutput = await process.ReadLineAsync();
                 if (!string.IsNullOrEmpty(terminalLineOutput))
                 {
                     var scriptOutput = await this.scriptEngineProvider.ParseAsync(script, terminalLineOutput, lineCount++);

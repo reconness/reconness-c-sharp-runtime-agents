@@ -4,7 +4,7 @@ public interface IProcessProvider
 {
     void Start(string command);
 
-    string? ReadLine();
+    Task<string?> ReadLineAsync();
 
     bool EndOfStream { get; }
 

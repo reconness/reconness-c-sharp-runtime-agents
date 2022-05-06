@@ -26,11 +26,11 @@ public class ProcessProvider : IProcessProvider
         };
     }
 
-    public string? ReadLine()
+    public async Task<string?> ReadLineAsync()
     {
         if (!this.EndOfStream)
         {
-            return this.process.StandardOutput.ReadLine();
+            return await this.process.StandardOutput.ReadLineAsync();
         }
 
         return string.Empty;
