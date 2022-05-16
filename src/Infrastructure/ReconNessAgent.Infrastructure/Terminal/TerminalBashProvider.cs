@@ -2,17 +2,17 @@
 using Serilog;
 using System.Diagnostics;
 
-namespace ReconNessAgent.Infrastructure;
+namespace ReconNessAgent.Infrastructure.Terminal;
 
-public class ProcessProvider : IProcessProvider
+public class TerminalBashProvider : ITerminalProvider
 {
-    private static readonly ILogger _logger = Log.ForContext<ProcessProvider>();
+    private static readonly ILogger _logger = Log.ForContext<TerminalBashProvider>();
 
     private Process process;
 
-    public void Start(string command)
+    public void Execute(string command)
     {
-        this.process = new Process()
+        process = new Process()
         {
             StartInfo = new ProcessStartInfo
             {
@@ -28,28 +28,28 @@ public class ProcessProvider : IProcessProvider
 
     public async Task<string?> ReadLineAsync()
     {
-        if (!this.EndOfStream)
+        if (!Finished)
         {
-            return await this.process.StandardOutput.ReadLineAsync();
+            return await process.StandardOutput.ReadLineAsync();
         }
 
         return string.Empty;
     }
 
-    public bool EndOfStream
+    public bool Finished
     {
         get
         {
-            if (this.process == null)
+            if (process == null)
             {
                 return true;
             }
 
-            return this.process.StandardOutput.EndOfStream;
+            return process.StandardOutput.EndOfStream;
         }
     }
 
-    public void Stop()
+    public void Exit()
     {
         if (process != null)
         {

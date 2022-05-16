@@ -1,18 +1,18 @@
-﻿using ReconNessAgent.Application.Models;
-using ReconNessAgent.Application.Providers;
+﻿using ReconNessAgent.Application.Factories;
+using ReconNessAgent.Application.Models;
 using System.Text.Json;
 
 namespace ReconNessAgent.Application.Services;
 
 public class AgentService : IAgentService
 {
-    private readonly IScriptEngineProvider scriptEngineProvider;
-    private readonly IProcessProviderFactory processProviderFactory;
+    private readonly IScriptEngineProvideFactory scriptEngineProvideFactory;
+    private readonly ITerminalProviderFactory terminalProviderFactory;
 
-    public AgentService(IScriptEngineProvider scriptEngineProvider, IProcessProviderFactory processProviderFactory)
+    public AgentService(IScriptEngineProvideFactory scriptEngineProvideFactory, ITerminalProviderFactory terminalProviderFactory)
     {
-        this.scriptEngineProvider = scriptEngineProvider;
-        this.processProviderFactory = processProviderFactory;
+        this.scriptEngineProvideFactory = scriptEngineProvideFactory;
+        this.terminalProviderFactory = terminalProviderFactory;
     }
 
     public async Task RunAsync(string agentInfoJson, CancellationToken cancellationToken = default)
@@ -22,31 +22,32 @@ public class AgentService : IAgentService
         {
             // change channel status to running if is queued on AgentRunner
 
-            var process = this.processProviderFactory.Build();
-            process.Start(agentInfo.Command);
-
-            var lineCount = 1;
+            var terminal = this.terminalProviderFactory.CreateTerminalProvider();
+            terminal.Execute(agentInfo.Command);
+                        
 
             // obtain the script base in the channel on AgentRunner
             var script = string.Empty;
+            var scriptEngineProvider = this.scriptEngineProvideFactory.CreateScriptEngineProvider(script);
 
-            while (!process.EndOfStream)
+            var count = 1;
+            while (!terminal.Finished)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 // check channel status if the agent stopped break and stop the process on AgentRunner
 
-                var terminalLineOutput = await process.ReadLineAsync();
-                if (!string.IsNullOrEmpty(terminalLineOutput))
+                var output = await terminal.ReadLineAsync();
+                if (!string.IsNullOrEmpty(output))
                 {
-                    var scriptOutput = await this.scriptEngineProvider.ParseAsync(script, terminalLineOutput, lineCount++);
+                    var scriptOutput = await scriptEngineProvider.ParseAsync(output, count++);
 
                     // save terminalLineOutput on AgentRunnerOutput
                     // update output tables
                 }
             }
 
-            process.Stop();
+            terminal.Exit();
         }
     }
 }

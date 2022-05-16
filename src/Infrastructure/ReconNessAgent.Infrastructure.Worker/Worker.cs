@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Hosting;
+using ReconNessAgent.Application.Factories;
+using ReconNessAgent.Application.Models.Enums;
 using ReconNessAgent.Application.Providers;
 using Serilog;
 using System;
@@ -13,9 +15,9 @@ public class Worker : BackgroundService
 
     private readonly IPubSubProvider pubSubProvider;
 
-    public Worker(IPubSubProvider pubSubProvider)
+    public Worker(IPubSubProviderFactory pubSubProviderFactory)
     {
-        this.pubSubProvider = pubSubProvider;
+        this.pubSubProvider = pubSubProviderFactory.CreatePubSubProvider(PubSubType.RABBIT_MQ);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

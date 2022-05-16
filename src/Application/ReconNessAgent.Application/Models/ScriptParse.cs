@@ -1,6 +1,6 @@
 ﻿namespace ReconNessAgent.Application.Models;
 
-public class ScriptOutput
+public class ScriptParse
 {
     public string? RootDomain { get; set; }
 
