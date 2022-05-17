@@ -9,17 +9,29 @@ using System.Threading.Tasks;
 
 namespace ReconNessAgent.Infrastructure.Worker;
 
+/// <summary>
+/// 
+/// </summary>
 public class Worker : BackgroundService
 {
     private static readonly ILogger _logger = Log.ForContext<Worker>();
 
     private readonly IPubSubProvider pubSubProvider;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="pubSubProviderFactory"></param>
     public Worker(IPubSubProviderFactory pubSubProviderFactory)
     {
         this.pubSubProvider = pubSubProviderFactory.CreatePubSubProvider(PubSubType.RABBIT_MQ);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="stoppingToken"></param>
+    /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {            
         while (!stoppingToken.IsCancellationRequested)

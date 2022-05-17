@@ -4,12 +4,16 @@ using System.Diagnostics;
 
 namespace ReconNessAgent.Infrastructure.Terminal;
 
+/// <summary>
+/// 
+/// </summary>
 public class TerminalBashProvider : ITerminalProvider
 {
     private static readonly ILogger _logger = Log.ForContext<TerminalBashProvider>();
 
     private Process process;
 
+    /// <inheritdoc/>
     public void Execute(string command)
     {
         process = new Process()
@@ -26,6 +30,7 @@ public class TerminalBashProvider : ITerminalProvider
         };
     }
 
+    /// <inheritdoc/>
     public async Task<string?> ReadLineAsync()
     {
         if (!Finished)
@@ -36,6 +41,7 @@ public class TerminalBashProvider : ITerminalProvider
         return string.Empty;
     }
 
+    /// <inheritdoc/>
     public bool Finished
     {
         get
@@ -49,6 +55,7 @@ public class TerminalBashProvider : ITerminalProvider
         }
     }
 
+    /// <inheritdoc/>
     public void Exit()
     {
         if (process != null)

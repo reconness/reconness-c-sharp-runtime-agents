@@ -4,17 +4,32 @@ using System.Text.Json;
 
 namespace ReconNessAgent.Application.Services;
 
+/// <summary>
+/// This class implement the interface <see cref="IAgentService"/> to allow run agent commands 
+/// and save the data collected inside the database.
+/// </summary>
 public class AgentService : IAgentService
 {
+    private readonly IAgentRepository agentRepository;
     private readonly IScriptEngineProvideFactory scriptEngineProvideFactory;
     private readonly ITerminalProviderFactory terminalProviderFactory;
 
-    public AgentService(IScriptEngineProvideFactory scriptEngineProvideFactory, ITerminalProviderFactory terminalProviderFactory)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AgentService" /> class
+    /// </summary>
+    /// <param name="agentRepository"><see cref="IAgentRepository"/></param>
+    /// <param name="scriptEngineProvideFactory"><see cref="IScriptEngineProvideFactory"/></param>
+    /// <param name="terminalProviderFactory"><see cref="ITerminalProviderFactory"/></param>
+    public AgentService(IAgentRepository agentRepository,
+        IScriptEngineProvideFactory scriptEngineProvideFactory, 
+        ITerminalProviderFactory terminalProviderFactory)
     {
+        this.agentRepository = agentRepository;
         this.scriptEngineProvideFactory = scriptEngineProvideFactory;
         this.terminalProviderFactory = terminalProviderFactory;
     }
 
+    /// <inheritdoc/>
     public async Task RunAsync(string agentInfoJson, CancellationToken cancellationToken = default)
     {
         var agentInfo = JsonSerializer.Deserialize<AgentInfo>(agentInfoJson);

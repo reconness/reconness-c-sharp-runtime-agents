@@ -2,15 +2,18 @@
 
 namespace ReconNessAgent.Application.Providers;
 
+/// <summary>
+/// This interface expose the method to parse the terminal output.
+/// </summary>
 public interface IScriptEngineProvider
 {
     /// <summary>
-    /// Parse the terminal input and return what we need to save on database
+    /// Parse the terminal output and return what we need to save on database.
     /// </summary>
-    /// <param name="lineInput">The terminal output line</param>
-    /// <param name="lineInputCount">the count of the terminal output line</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    /// <returns>What we need to save on database</returns>
-    Task<ScriptParse> ParseAsync(string lineInput, int lineInputCount, CancellationToken cancellationToken = default);
+    /// <param name="lineOutput">The terminal output line.</param>
+    /// <param name="lineOutputCount">the count of the terminal output line.</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled.</param>
+    /// <returns>What we need to save on database.</returns>
+    Task<ScriptParse> ParseAsync(string lineOutput, int lineOutputCount, CancellationToken cancellationToken = default);
 }
 

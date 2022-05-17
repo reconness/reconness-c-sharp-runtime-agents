@@ -7,6 +7,9 @@ using System.Reflection;
 
 namespace ReconNessAgent.Infrastructure.ScriptEngine;
 
+/// <summary>
+/// 
+/// </summary>
 public class CCharpScriptEngineProvider : IScriptEngineProvider
 {
     private static readonly ILogger _logger = Log.ForContext<CCharpScriptEngineProvider>();
