@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace ReconNessAgent.Infrastructure.Worker;
 
 /// <summary>
-/// 
+/// This class extend the class <see cref="BackgroundService"/> to run on background as a service.
 /// </summary>
 public class Worker : BackgroundService
 {
@@ -19,19 +19,19 @@ public class Worker : BackgroundService
     private readonly IPubSubProvider pubSubProvider;
 
     /// <summary>
-    /// 
+    /// Initializes a new instance of the <see cref="Worker" /> class.
     /// </summary>
-    /// <param name="pubSubProviderFactory"></param>
+    /// <param name="pubSubProviderFactory"><see cref="IPubSubProviderFactory"/></param>
     public Worker(IPubSubProviderFactory pubSubProviderFactory)
     {
         this.pubSubProvider = pubSubProviderFactory.CreatePubSubProvider(PubSubType.RABBIT_MQ);
     }
 
     /// <summary>
-    /// 
+    /// Execute the background service.
     /// </summary>
-    /// <param name="stoppingToken"></param>
-    /// <returns></returns>
+    /// <param name="stoppingToken">Notification that operations should be canceled.</param>
+    /// <returns>A task.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {            
         while (!stoppingToken.IsCancellationRequested)

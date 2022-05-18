@@ -8,7 +8,8 @@ using System.Reflection;
 namespace ReconNessAgent.Infrastructure.ScriptEngine;
 
 /// <summary>
-/// 
+/// This class implement the interface <see cref="IScriptEngineProvider"/> to parse the terminal output.
+/// This particular implementation is using c# as script engine to parse the terminal output.
 /// </summary>
 public class CCharpScriptEngineProvider : IScriptEngineProvider
 {
@@ -17,9 +18,9 @@ public class CCharpScriptEngineProvider : IScriptEngineProvider
     private readonly string script;
 
     /// <summary>
-    /// 
+    /// Initializes a new instance of the <see cref="CCharpScriptEngineProvider" /> class.
     /// </summary>
-    /// <param name="script">The script that is going to parse the console input.</param>
+    /// <param name="script">The script that is going to parse the terminal output.</param>
     public CCharpScriptEngineProvider(string script)
     {
         this.script = script;
@@ -46,7 +47,7 @@ public class CCharpScriptEngineProvider : IScriptEngineProvider
 /// </summary>
 public class Globals
 {
-    public string lineInput;
+    public string? lineInput;
 
     public int lineInputCount;
 }

@@ -5,13 +5,14 @@ using System.Diagnostics;
 namespace ReconNessAgent.Infrastructure.Terminal;
 
 /// <summary>
-/// 
+/// This class implement the interface <see cref="ITerminalProvider"/> to execute, read lines, check if the command finished and exit the terminal.
+/// This particular implementation is using "/bin/bash" <see cref="Process"/> to run the command.
 /// </summary>
 public class TerminalBashProvider : ITerminalProvider
 {
     private static readonly ILogger _logger = Log.ForContext<TerminalBashProvider>();
 
-    private Process process;
+    private Process? process;
 
     /// <inheritdoc/>
     public void Execute(string command)
@@ -33,7 +34,7 @@ public class TerminalBashProvider : ITerminalProvider
     /// <inheritdoc/>
     public async Task<string?> ReadLineAsync()
     {
-        if (!Finished)
+        if (!Finished && process != null)
         {
             return await process.StandardOutput.ReadLineAsync();
         }

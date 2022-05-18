@@ -9,7 +9,8 @@ using System.Text;
 namespace ReconNessAgent.Infrastructure.PubSub;
 
 /// <summary>
-/// 
+/// This class implement the interface <see cref="IPubSubProvider"/> to consume message from the pub/sub provider that we are using.
+/// This particular implementation is using RabbitMQ as pub/sub provider.
 /// </summary>
 public class RabbitMQPubSubProvider : IPubSubProvider
 {
@@ -23,7 +24,7 @@ public class RabbitMQPubSubProvider : IPubSubProvider
     private string? queueName;
 
     /// <summary>
-    /// 
+    /// Initializes a new instance of the <see cref="RabbitMQPubSubProvider" /> class.
     /// </summary>
     /// <param name="agentService"><see cref="IAgentService"/></param>
     /// <param name="options">The configuraion options</param>
@@ -47,7 +48,7 @@ public class RabbitMQPubSubProvider : IPubSubProvider
     }
 
     /// <summary>
-    /// 
+    /// Subscribe to the RabbitMQ consumer event 
     /// </summary>
     private void SubscribeConsumerEvent(CancellationToken cancellationToken)
     {
@@ -78,7 +79,7 @@ public class RabbitMQPubSubProvider : IPubSubProvider
     }
 
     /// <summary>
-    /// 
+    /// Try to initialize the channel .
     /// </summary>
     private void InitializeChannel()
     {
