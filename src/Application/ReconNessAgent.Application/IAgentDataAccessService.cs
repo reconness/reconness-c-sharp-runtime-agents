@@ -7,7 +7,7 @@ namespace ReconNessAgent.Application;
 /// <summary>
 /// This interface is used in all the interation with the database.
 /// </summary>
-public interface IAgentRepository
+public interface IAgentDataAccessService
 {
     /// <summary>
     /// 
@@ -20,55 +20,55 @@ public interface IAgentRepository
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="runnerId"></param>
+    /// <param name="agentRunner"></param>
     /// <param name="stage"></param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns></returns>
-    Task ChangeAgentRunnerStatusAsync(Guid runnerId, AgentRunnerStage stage, CancellationToken cancellationToken);
+    Task ChangeAgentRunnerStageAsync(AgentRunner agentRunner, AgentRunnerStage stage, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="agentId"></param>
+    /// <param name="agentRunner"></param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns></returns>
-    Task<string> GetAgentScriptAsync(Guid agentId, CancellationToken cancellationToken);
+    Task<string> GetAgentScriptAsync(AgentRunner agentRunner, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="runnerId"></param>
+    /// <param name="agentRunner"></param>
     /// <param name="agentRunStages"></param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns></returns>
-    Task<bool> HasAgentRunnerStatusAsync(Guid runnerId, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken);
+    Task<bool> HasAgentRunnerStatusAsync(AgentRunner agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="commandId"></param>
+    /// <param name="agentRunnerCommand"></param>
     /// <param name="output"></param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns></returns>
-    Task SaveAgentRunnerCommandOutputAsync(Guid commandId, string output, CancellationToken cancellationToken);
+    Task SaveAgentRunnerCommandOutputAsync(AgentRunnerCommand agentRunnerCommand, string output, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="runnerId"></param>
+    /// <param name="agentRunner"></param>
     /// <param name="agentInfo"></param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns></returns>
-    Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(Guid runnerId, AgentInfo agentInfo, CancellationToken cancellationToken);
+    Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(AgentRunner agentRunner, AgentRunnerQueue agentInfo, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="commandId"></param>
+    /// <param name="agentRunnerCommand"></param>
     /// <param name="status"></param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns></returns>
-    Task<AgentRunnerCommand> UpdateAgentRunnerCommandAsync(Guid commandId, AgentRunnerCommandStatus status, CancellationToken cancellationToken);
+    Task<AgentRunnerCommand> ChangeAgentRunnerCommandStatusAsync(AgentRunnerCommand agentRunnerCommand, AgentRunnerCommandStatus status, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -81,9 +81,9 @@ public interface IAgentRepository
     /// <summary>
     /// Save what we found parsing the terminal output
     /// </summary>
-    /// <param name="channel">The channel where we have the target, rootdomain, subdomain information</param>
-    /// <param name="scriptOutput">The script parsed</param>
+    /// <param name="agentRunner">The agent runner id</param>
+    /// <param name="outputParse">The script parsed</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns></returns>
-    Task SaveScriptOutputAsync(string channel, ScriptParse scriptOutput, CancellationToken cancellationToken);
+    Task SaveScriptOutputAsync(AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
 }

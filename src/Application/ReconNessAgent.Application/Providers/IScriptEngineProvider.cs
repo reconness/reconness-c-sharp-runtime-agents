@@ -14,6 +14,6 @@ public interface IScriptEngineProvider
     /// <param name="lineOutputCount">the count of the terminal output line.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>What we need to save on database.</returns>
-    Task<ScriptParse> ParseAsync(string lineOutput, int lineOutputCount, CancellationToken cancellationToken = default);
+    Task<TerminalOutputParse> ParseAsync(string lineOutput, int lineOutputCount, CancellationToken cancellationToken = default);
 }
 

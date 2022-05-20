@@ -13,8 +13,6 @@ namespace ReconNessAgent.Infrastructure.ScriptEngine;
 /// </summary>
 public class CCharpScriptEngineProvider : IScriptEngineProvider
 {
-    private static readonly ILogger _logger = Log.ForContext<CCharpScriptEngineProvider>();
-
     private readonly string script;
 
     /// <summary>
@@ -27,15 +25,15 @@ public class CCharpScriptEngineProvider : IScriptEngineProvider
     }
 
     /// <inheritdoc/>
-    public async Task<ScriptParse> ParseAsync(string lineInput, int lineInputCount, CancellationToken cancellationToken = default)
+    public async Task<TerminalOutputParse> ParseAsync(string lineInput, int lineInputCount, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         var globals = new Globals { lineInput = lineInput, lineInputCount = lineInputCount };
-        return await CSharpScript.EvaluateAsync<ScriptParse>(script,
+        return await CSharpScript.EvaluateAsync<TerminalOutputParse>(script,
             ScriptOptions.Default.WithImports("ReconNessAgent.Application.Models.ScriptParse")
             .AddReferences(
-                Assembly.GetAssembly(typeof(ScriptParse)),
+                Assembly.GetAssembly(typeof(TerminalOutputParse)),
                 Assembly.GetAssembly(typeof(Exception)),
                 Assembly.GetAssembly(typeof(System.Text.RegularExpressions.Regex)))
             , globals: globals, cancellationToken: cancellationToken);

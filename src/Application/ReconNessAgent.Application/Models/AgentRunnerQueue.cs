@@ -1,6 +1,6 @@
 ﻿namespace ReconNessAgent.Application.Models;
 
-public class AgentInfo
+public class AgentRunnerQueue
 {
     public string Channel { get; set; } = string.Empty;
     public string Command { get; set; } = string.Empty;
