@@ -20,7 +20,6 @@
     <ProjectReference Include="..\..\Application\ReconNessAgent.Application.Services\ReconNessAgent.Application.Services.csproj" />
     <ProjectReference Include="..\..\Application\ReconNessAgent.Application\ReconNessAgent.Application.csproj" />
     <ProjectReference Include="..\..\Domain\ReconNessAgent.Domain.Core\ReconNessAgent.Domain.Core.csproj" />
-    <ProjectReference Include="..\ReconNessAgent.Infrastructure.Data.Dapper\ReconNessAgent.Infrastructure.Data.Dapper.csproj" />
     <ProjectReference Include="..\ReconNessAgent.Infrastructure\ReconNessAgent.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
