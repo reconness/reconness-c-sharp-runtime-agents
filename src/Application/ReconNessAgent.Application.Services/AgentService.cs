@@ -112,7 +112,7 @@ public class AgentService : IAgentService
             cancellationToken.ThrowIfCancellationRequested();
 
             // check channel status if the agent stopped or failed break and stop the process on AgentRunner
-            if (await this.agentDataAccessService.HasAgentRunnerStatusAsync(agentRunner, new List<AgentRunnerStage> { AgentRunnerStage.STOPPED, AgentRunnerStage.FAILED }, cancellationToken))
+            if (await this.agentDataAccessService.HasAgentRunnerStageAsync(agentRunner, new List<AgentRunnerStage> { AgentRunnerStage.STOPPED, AgentRunnerStage.FAILED }, cancellationToken))
             {
                 return AgentRunnerCommandStatus.STOPPED;
             }

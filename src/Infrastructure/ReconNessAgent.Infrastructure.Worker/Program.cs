@@ -5,6 +5,7 @@ using ReconNessAgent.Application.Factories;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Services;
 using ReconNessAgent.Application.Services.Factories;
+using ReconNessAgent.Infrastructure.Data.EF;
 using Serilog;
 using System;
 
@@ -59,6 +60,9 @@ namespace ReconNessAgent.Infrastructure.Worker
             services.AddSingleton<IScriptEngineProvideFactory, ScriptEngineProvideFactory>();
 
             services.AddSingleton<IAgentService, AgentService>();
+            services.AddSingleton<IAgentDataAccessService, AgentDataAccessService>();
+
+            services.AddSingleton<IUnitOfWork, UnitOfWork>();
         }
     }
 }
