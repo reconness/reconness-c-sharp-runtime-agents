@@ -6,6 +6,7 @@ using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Services;
 using ReconNessAgent.Application.Services.Factories;
 using ReconNessAgent.Infrastructure.Data.EF;
+using ReconNessAgent.Infrastructure.DataAccess;
 using Serilog;
 using System;
 

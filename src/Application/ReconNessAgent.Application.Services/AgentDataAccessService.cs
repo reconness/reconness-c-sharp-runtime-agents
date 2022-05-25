@@ -1,7 +1,7 @@
 ﻿using ReconNessAgent.Application.Models;
 using ReconNessAgent.Domain.Core;
 using ReconNessAgent.Domain.Core.Enums;
-using ReconNessAgent.Infrastructure;
+using ReconNessAgent.Infrastructure.DataAccess;
 
 namespace ReconNessAgent.Application.Services;
 
