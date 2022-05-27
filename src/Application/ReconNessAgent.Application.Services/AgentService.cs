@@ -1,4 +1,6 @@
-﻿using ReconNessAgent.Application.Factories;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ReconNessAgent.Application.DataAccess;
+using ReconNessAgent.Application.Factories;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Providers;
 using ReconNessAgent.Domain.Core;
@@ -17,19 +19,25 @@ public class AgentService : IAgentService
     private readonly IScriptEngineProvideFactory scriptEngineProvideFactory;
     private readonly ITerminalProviderFactory terminalProviderFactory;
 
+    private readonly IServiceProvider serviceProvider;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="AgentService" /> class.
     /// </summary>
     /// <param name="agentDataAccessService"><see cref="IAgentDataAccessService"/></param>
     /// <param name="scriptEngineProvideFactory"><see cref="IScriptEngineProvideFactory"/></param>
     /// <param name="terminalProviderFactory"><see cref="ITerminalProviderFactory"/></param>
-    public AgentService(IAgentDataAccessService agentDataAccessService,
+    /// <param name="serviceProvid"></param>
+    public AgentService(
+        IAgentDataAccessService agentDataAccessService,
         IScriptEngineProvideFactory scriptEngineProvideFactory, 
-        ITerminalProviderFactory terminalProviderFactory)
+        ITerminalProviderFactory terminalProviderFactory,
+        IServiceProvider serviceProvider)
     {
         this.agentDataAccessService = agentDataAccessService;
         this.scriptEngineProvideFactory = scriptEngineProvideFactory;
         this.terminalProviderFactory = terminalProviderFactory;
+        this.serviceProvider = serviceProvider;
     }
 
     /// <inheritdoc/>
@@ -38,37 +46,53 @@ public class AgentService : IAgentService
         var agentRunnerQueue = JsonSerializer.Deserialize<AgentRunnerQueue>(agentRunnerQueueJson);
         if (agentRunnerQueue != null)
         {
-            var agentRunner = await this.agentDataAccessService.GetAgentRunnerAsync(agentRunnerQueue.Channel, cancellationToken);
-
-            // change channel stage to RUNNING if the stage is ENQUEUE on AgentRunner
-            if (agentRunner.Stage == AgentRunnerStage.ENQUEUE)
+            using var scope = this.serviceProvider.CreateScope();
+            var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+            if (unitOfWork != null)
             {
-                await this.agentDataAccessService.ChangeAgentRunnerStageAsync(agentRunner, AgentRunnerStage.RUNNING, cancellationToken);
-            }
+                try
+                {
+                    unitOfWork.BeginTransaction();
+                    var agentRunner = await this.agentDataAccessService.GetAgentRunnerAsync(unitOfWork, agentRunnerQueue.Channel, cancellationToken);
 
-            // create agent runner command new entry with status RUNNING
-            var agentRunnerCommand = await this.agentDataAccessService.CreateAgentRunnerCommandAsync(agentRunner, agentRunnerQueue, cancellationToken);
+                    // change channel stage to RUNNING if the stage is ENQUEUE on AgentRunner
+                    if (agentRunner.Stage == AgentRunnerStage.ENQUEUE)
+                    {
+                        await this.agentDataAccessService.ChangeAgentRunnerStageAsync(unitOfWork, agentRunner, AgentRunnerStage.RUNNING, cancellationToken);
+                    }
 
-            // if we can skip this agent runner command, change status to SKIPPED
-            if (agentRunner.AllowSkip && await this.agentDataAccessService.CanSkipAgentRunnerCommandAsync(agentRunnerCommand, cancellationToken))
-            {
-                await this.agentDataAccessService.ChangeAgentRunnerCommandStatusAsync(agentRunnerCommand, AgentRunnerCommandStatus.SKIPPED, cancellationToken);
-                return;
+                    // create agent runner command new entry with status RUNNING
+                    var agentRunnerCommand = await this.agentDataAccessService.CreateAgentRunnerCommandAsync(unitOfWork, agentRunner, agentRunnerQueue, cancellationToken);
+
+                    // if we can skip this agent runner command, change status to SKIPPED
+                    if (agentRunner.AllowSkip && await this.agentDataAccessService.CanSkipAgentRunnerCommandAsync(unitOfWork, agentRunnerCommand, cancellationToken))
+                    {
+                        await this.agentDataAccessService.ChangeAgentRunnerCommandStatusAsync(unitOfWork, agentRunnerCommand, AgentRunnerCommandStatus.SKIPPED, cancellationToken);
+                        return;
+                    }
+
+                    await RunInternalAsync(unitOfWork, agentRunnerQueue, agentRunner, agentRunnerCommand, cancellationToken);
+
+                    await unitOfWork.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    unitOfWork.Rollback();
+                }
             }
-            
-            await RunInternalAsync(agentRunnerQueue, agentRunner, agentRunnerCommand, cancellationToken);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="unitOfWork"></param>
     /// <param name="agentRunnerQueue"></param>
     /// <param name="agentRunner"></param>
     /// <param name="agentRunnerCommand"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task RunInternalAsync(AgentRunnerQueue agentRunnerQueue, AgentRunner agentRunner, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
+    private async Task RunInternalAsync(IUnitOfWork unitOfWork, AgentRunnerQueue agentRunnerQueue, AgentRunner agentRunner, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
     {
         var terminalProvider = this.terminalProviderFactory.CreateTerminalProvider();
 
@@ -77,17 +101,17 @@ public class AgentService : IAgentService
         try
         {
             // obtain the script from the Agent and the provider
-            var script = await this.agentDataAccessService.GetAgentScriptAsync(agentRunner, cancellationToken);
+            var script = await this.agentDataAccessService.GetAgentScriptAsync(unitOfWork, agentRunner, cancellationToken);
             var scriptEngineProvider = this.scriptEngineProvideFactory.CreateScriptEngineProvider(script);
 
-            agentRunnerCommandStatus = await RunTerminalAsync(agentRunnerQueue, agentRunner, agentRunnerCommand, terminalProvider, scriptEngineProvider, cancellationToken);
+            agentRunnerCommandStatus = await RunTerminalAsync(unitOfWork, agentRunnerQueue, agentRunner, agentRunnerCommand, terminalProvider, scriptEngineProvider, cancellationToken);
         }
         catch (Exception)
         {
             agentRunnerCommandStatus = AgentRunnerCommandStatus.FAILED;
         }
 
-        await this.agentDataAccessService.ChangeAgentRunnerCommandStatusAsync(agentRunnerCommand, agentRunnerCommandStatus, cancellationToken);
+        await this.agentDataAccessService.ChangeAgentRunnerCommandStatusAsync(unitOfWork, agentRunnerCommand, agentRunnerCommandStatus, cancellationToken);
 
         terminalProvider.Exit();
     }
@@ -95,6 +119,7 @@ public class AgentService : IAgentService
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="unitOfWork"></param>
     /// <param name="agentRunnerQueue"></param>
     /// <param name="agentRunner"></param>
     /// <param name="agentRunnerCommand"></param>
@@ -102,7 +127,13 @@ public class AgentService : IAgentService
     /// <param name="scriptEngineProvider"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<AgentRunnerCommandStatus> RunTerminalAsync(AgentRunnerQueue agentRunnerQueue, AgentRunner agentRunner, AgentRunnerCommand agentRunnerCommand, ITerminalProvider terminal, IScriptEngineProvider scriptEngineProvider, CancellationToken cancellationToken)
+    private async Task<AgentRunnerCommandStatus> RunTerminalAsync(IUnitOfWork unitOfWork,
+                                                                  AgentRunnerQueue agentRunnerQueue,
+                                                                  AgentRunner agentRunner,
+                                                                  AgentRunnerCommand agentRunnerCommand,
+                                                                  ITerminalProvider terminal,
+                                                                  IScriptEngineProvider scriptEngineProvider,
+                                                                  CancellationToken cancellationToken)
     {
         var count = 1;
         terminal.Execute(agentRunnerQueue.Command);
@@ -112,7 +143,7 @@ public class AgentService : IAgentService
             cancellationToken.ThrowIfCancellationRequested();
 
             // check channel status if the agent stopped or failed break and stop the process on AgentRunner
-            if (await this.agentDataAccessService.HasAgentRunnerStageAsync(agentRunner, new List<AgentRunnerStage> { AgentRunnerStage.STOPPED, AgentRunnerStage.FAILED }, cancellationToken))
+            if (await this.agentDataAccessService.HasAgentRunnerStageAsync(unitOfWork, agentRunner, new List<AgentRunnerStage> { AgentRunnerStage.STOPPED, AgentRunnerStage.FAILED }, cancellationToken))
             {
                 return AgentRunnerCommandStatus.STOPPED;
             }
@@ -123,10 +154,10 @@ public class AgentService : IAgentService
                 var outputParse = await scriptEngineProvider.ParseAsync(output, count++, cancellationToken);
 
                 // save terminalLineOutput on AgentRunnerOutput
-                await this.agentDataAccessService.SaveAgentRunnerCommandOutputAsync(agentRunnerCommand, output, cancellationToken);
+                await this.agentDataAccessService.SaveAgentRunnerCommandOutputAsync(unitOfWork, agentRunnerCommand, output, cancellationToken);
 
                 // save what we parse from the terminal output
-                await this.agentDataAccessService.SaveScriptOutputAsync(agentRunner, outputParse, cancellationToken);
+                await this.agentDataAccessService.SaveScriptOutputAsync(unitOfWork, agentRunner, outputParse, cancellationToken);
             }
         }
 

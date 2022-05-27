@@ -1,4 +1,4 @@
-﻿using ReconNessAgent.Infrastructure.DataAccess;
+﻿using ReconNessAgent.Application.DataAccess;
 using System.Linq.Expressions;
 
 namespace ReconNessAgent.Infrastructure.Data.EF;

@@ -1,4 +1,4 @@
-﻿namespace ReconNessAgent.Infrastructure.DataAccess;
+﻿namespace ReconNessAgent.Application.DataAccess;
 
 /// <summary>
 /// This interface define a Unit of Work patter

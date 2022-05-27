@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ReconNessAgent.Infrastructure.DataAccess;
+namespace ReconNessAgent.Application.DataAccess;
 
 /// <summary>
 /// The interface IRepository<TEntity>

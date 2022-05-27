@@ -1,7 +1,7 @@
-﻿using ReconNessAgent.Application.Models;
+﻿using ReconNessAgent.Application.DataAccess;
+using ReconNessAgent.Application.Models;
 using ReconNessAgent.Domain.Core;
 using ReconNessAgent.Domain.Core.Enums;
-using ReconNessAgent.Infrastructure.DataAccess;
 
 namespace ReconNessAgent.Application.Services;
 
@@ -10,67 +10,56 @@ namespace ReconNessAgent.Application.Services;
 /// </summary>
 public class AgentDataAccessService : IAgentDataAccessService
 {
-    private readonly IUnitOfWork unitOfWork;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AgentDataAccessService" /> class.
-    /// </summary>
-    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
-    public AgentDataAccessService(IUnitOfWork unitOfWork)
+    /// <inheritdoc/>
+    public Task<bool> CanSkipAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
     {
-        this.unitOfWork = unitOfWork;
+        return Task.FromResult(true);
     }
 
     /// <inheritdoc/>
-    public Task<bool> CanSkipAgentRunnerCommandAsync(AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
+    public Task ChangeAgentRunnerCommandStatusAsync(IUnitOfWork unitOfWork, AgentRunnerCommand agentRunnerCommand, AgentRunnerCommandStatus status, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task ChangeAgentRunnerCommandStatusAsync(AgentRunnerCommand agentRunnerCommand, AgentRunnerCommandStatus status, CancellationToken cancellationToken)
+    public Task ChangeAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, AgentRunnerStage stage, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task ChangeAgentRunnerStageAsync(AgentRunner agentRunner, AgentRunnerStage stage, CancellationToken cancellationToken)
+    public Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, AgentRunnerQueue agentRunnerQueue, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(AgentRunner agentRunner, AgentRunnerQueue agentRunnerQueue, CancellationToken cancellationToken)
+    public Task<AgentRunner> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<AgentRunner> GetAgentRunnerAsync(string channel, CancellationToken cancellationToken)
+    public Task<string> GetAgentScriptAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<string> GetAgentScriptAsync(AgentRunner agentRunner, CancellationToken cancellationToken)
+    public Task<bool> HasAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<bool> HasAgentRunnerStageAsync(AgentRunner agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken)
+    public Task SaveAgentRunnerCommandOutputAsync(IUnitOfWork unitOfWork, AgentRunnerCommand agentRunnerCommand, string output, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task SaveAgentRunnerCommandOutputAsync(AgentRunnerCommand agentRunnerCommand, string output, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <inheritdoc/>
-    public Task SaveScriptOutputAsync(AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken)
+    public Task SaveScriptOutputAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
