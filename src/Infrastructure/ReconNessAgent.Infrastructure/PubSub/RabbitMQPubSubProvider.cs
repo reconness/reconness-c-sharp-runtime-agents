@@ -35,15 +35,16 @@ public class RabbitMQPubSubProvider : IPubSubProvider
     }
 
     /// <inheritdoc/>
-    public async Task ConsumerAsync(CancellationToken stoppingToken)
+    public Task ConsumerAsync(CancellationToken stoppingToken)
     {
         if (this.channel == null)
         {
-            await agentService.TestDBContext();
             this.InitializeChannel();
 
             this.SubscribeConsumerEvent(stoppingToken);
         }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>

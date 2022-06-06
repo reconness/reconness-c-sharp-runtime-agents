@@ -17,7 +17,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         }
 
         public virtual DbSet<Agent> Agents { get; set; } = null!;
-        public virtual DbSet<AgentRun> AgentRuns { get; set; } = null!;
+        public virtual DbSet<AgentRunner> AgentRunners { get; set; } = null!;
         public virtual DbSet<AgentRunnerCommand> AgentRunnerCommands { get; set; } = null!;
         public virtual DbSet<AgentRunnerCommandOutput> AgentRunnerCommandOutputs { get; set; } = null!;
         public virtual DbSet<AgentTrigger> AgentTriggers { get; set; } = null!;
@@ -156,14 +156,14 @@ namespace ReconNessAgent.Infrastructure.Data.EF
                         });
             });
 
-            modelBuilder.Entity<AgentRun>(entity =>
+            modelBuilder.Entity<AgentRunner>(entity =>
             {
-                entity.HasIndex(e => e.AgentId, "IX_AgentRuns_AgentId");
+                entity.HasIndex(e => e.AgentId, "IX_AgentRunners_AgentId");
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.HasOne(d => d.Agent)
-                    .WithMany(p => p.AgentRuns)
+                    .WithMany(p => p.AgentRunners)
                     .HasForeignKey(d => d.AgentId);
             });
 

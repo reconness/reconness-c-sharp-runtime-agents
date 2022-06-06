@@ -7,7 +7,7 @@ namespace ReconNessAgent.Domain.Core.Entities
     {
         public Agent()
         {
-            AgentRuns = new HashSet<AgentRun>();
+            AgentRunners = new HashSet<AgentRunner>();
             EventTracks = new HashSet<EventTrack>();
             Categories = new HashSet<Category>();
         }
@@ -30,7 +30,7 @@ namespace ReconNessAgent.Domain.Core.Entities
         public string? Image { get; set; }
 
         public virtual AgentTrigger AgentTrigger { get; set; } = null!;
-        public virtual ICollection<AgentRun> AgentRuns { get; set; }
+        public virtual ICollection<AgentRunner> AgentRunners { get; set; }
         public virtual ICollection<EventTrack> EventTracks { get; set; }
 
         public virtual ICollection<Category> Categories { get; set; }

@@ -84,18 +84,6 @@ public class AgentService : IAgentService
         }
     }
 
-    public async Task TestDBContext()
-    {
-        using var scope = this.serviceProvider.CreateScope();
-        var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
-        if (unitOfWork == null)
-        {
-            throw new Exception("Bad database");
-        }
-
-        var targets = await unitOfWork.Repository<Target>().GetAllAsync();
-    }
-
     /// <summary>
     /// 
     /// </summary>
@@ -105,7 +93,7 @@ public class AgentService : IAgentService
     /// <param name="agentRunnerCommand"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task RunInternalAsync(IUnitOfWork unitOfWork, AgentRunnerQueue agentRunnerQueue, AgentRun agentRunner, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
+    private async Task RunInternalAsync(IUnitOfWork unitOfWork, AgentRunnerQueue agentRunnerQueue, AgentRunner agentRunner, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
     {
         var terminalProvider = this.terminalProviderFactory.CreateTerminalProvider();
 
@@ -142,7 +130,7 @@ public class AgentService : IAgentService
     /// <returns></returns>
     private async Task<AgentRunnerCommandStatus> RunTerminalAsync(IUnitOfWork unitOfWork,
                                                                   AgentRunnerQueue agentRunnerQueue,
-                                                                  AgentRun agentRunner,
+                                                                  AgentRunner agentRunner,
                                                                   AgentRunnerCommand agentRunnerCommand,
                                                                   ITerminalProvider terminal,
                                                                   IScriptEngineProvider scriptEngineProvider,

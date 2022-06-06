@@ -17,7 +17,7 @@ public interface IAgentDataAccessService
     /// <param name="channel">The channel for the search.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>The <see cref="AgentRunner"/> entity.</returns>
-    Task<AgentRun> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken);
+    Task<AgentRunner> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken);
 
     /// <summary>
     /// Change the stage for the <see cref="AgentRunner"/> entity.
@@ -27,7 +27,7 @@ public interface IAgentDataAccessService
     /// <param name="stage">The new stage <see cref="AgentRunnerStage"/>.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A task.</returns>
-    Task ChangeAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, AgentRunnerStage stage, CancellationToken cancellationToken);
+    Task ChangeAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, AgentRunnerStage stage, CancellationToken cancellationToken);
 
     /// <summary>
     /// Obtain the script from the Agent entity.
@@ -36,7 +36,7 @@ public interface IAgentDataAccessService
     /// <param name="agentRunner">The <see cref="AgentRunner"/> entity that contain the Agent Id foreign key <see cref="AgentRunner.AgentId"/>.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>The script to use to parse the terminal output.</returns>
-    Task<string> GetAgentScriptAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, CancellationToken cancellationToken);
+    Task<string> GetAgentScriptAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, CancellationToken cancellationToken);
 
     /// <summary>
     /// Verify the stage for the <see cref="AgentRunner"/>, if it has one of the list.
@@ -46,7 +46,7 @@ public interface IAgentDataAccessService
     /// <param name="agentRunStages">The list of stages that we want to check if the <see cref="AgentRunner"/> entity has.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>If it has one of the list.</returns>
-    Task<bool> HasAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken);
+    Task<bool> HasAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken);
 
     /// <summary>
     /// Create an <see cref="AgentRunnerCommand"/> with the status RUNNING 
@@ -56,7 +56,7 @@ public interface IAgentDataAccessService
     /// <param name="agentRunnerQueue">The <see cref="AgentRunnerQueue"/> with the info from the queue.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>An <see cref="AgentRunnerCommand"/> with the status RUNNING created.</returns>
-    Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, AgentRunnerQueue agentRunnerQueue, CancellationToken cancellationToken);
+    Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, AgentRunnerQueue agentRunnerQueue, CancellationToken cancellationToken);
 
     /// <summary>
     /// Save the output from the terminal.
@@ -95,5 +95,5 @@ public interface IAgentDataAccessService
     /// <param name="outputParse">The script parsed.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A task.</returns>
-    Task SaveScriptOutputAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
+    Task SaveScriptOutputAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
 }

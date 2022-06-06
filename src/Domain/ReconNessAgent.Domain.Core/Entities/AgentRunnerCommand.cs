@@ -20,7 +20,7 @@ namespace ReconNessAgent.Domain.Core.Entities
         public DateTime UpdatedAt { get; set; }
         public bool Deleted { get; set; }
 
-        public virtual AgentRun AgentRunner { get; set; } = null!;
+        public virtual AgentRunner AgentRunner { get; set; } = null!;
         public virtual ICollection<AgentRunnerCommandOutput> AgentRunnerCommandOutputs { get; set; }
     }
 }

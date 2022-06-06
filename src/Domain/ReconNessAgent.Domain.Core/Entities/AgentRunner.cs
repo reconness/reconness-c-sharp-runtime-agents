@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace ReconNessAgent.Domain.Core.Entities
 {
-    public partial class AgentRun
+    public partial class AgentRunner
     {
-        public AgentRun()
+        public AgentRunner()
         {
             AgentRunnerCommands = new HashSet<AgentRunnerCommand>();
         }
