@@ -1,6 +1,7 @@
 ﻿using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.Domain.Core;
+using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
 
 namespace ReconNessAgent.Application.Services;
@@ -23,31 +24,31 @@ public class AgentDataAccessService : IAgentDataAccessService
     }
 
     /// <inheritdoc/>
-    public Task ChangeAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, AgentRunnerStage stage, CancellationToken cancellationToken)
+    public Task ChangeAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, AgentRunnerStage stage, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, AgentRunnerQueue agentRunnerQueue, CancellationToken cancellationToken)
+    public Task<AgentRunnerCommand> CreateAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, AgentRunnerQueue agentRunnerQueue, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<AgentRunner> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken)
+    public Task<AgentRun> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<string> GetAgentScriptAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, CancellationToken cancellationToken)
+    public Task<string> GetAgentScriptAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public Task<bool> HasAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken)
+    public Task<bool> HasAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -59,7 +60,7 @@ public class AgentDataAccessService : IAgentDataAccessService
     }
 
     /// <inheritdoc/>
-    public Task SaveScriptOutputAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken)
+    public Task SaveScriptOutputAsync(IUnitOfWork unitOfWork, AgentRun agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ReconNessAgent.Infrastructure.Data.EF;
+namespace ReconNessAgent.Application.DataAccess;
 
 /// <summary>
 /// This interface define an abstract DbContext

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ReconNessAgent.Application;
+using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Factories;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Services;
@@ -60,9 +61,10 @@ namespace ReconNessAgent.Infrastructure.Worker
             services.AddSingleton<IScriptEngineProvideFactory, ScriptEngineProvideFactory>();
 
             services.AddSingleton<IAgentService, AgentService>();
-            services.AddSingleton<IAgentDataAccessService, AgentDataAccessService>();            
+            services.AddSingleton<IAgentDataAccessService, AgentDataAccessService>();
 
-            services.AddScoped<IDbContext, DbContext>();            
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IDbContext, ReconnessDbContext>();            
         }
     }
 }

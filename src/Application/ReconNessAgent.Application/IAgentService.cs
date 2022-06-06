@@ -13,4 +13,5 @@ public interface IAgentService
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A Task.</returns>
     public Task RunAsync(string agentRunnerQueueJson, CancellationToken cancellationToken = default);
+    Task TestDBContext();
 }
