@@ -3,9 +3,9 @@ using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Factories;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Providers;
-using ReconNessAgent.Domain.Core;
 using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
+using Serilog;
 using System.Text.Json;
 
 namespace ReconNessAgent.Application.Services;
@@ -16,6 +16,8 @@ namespace ReconNessAgent.Application.Services;
 /// </summary>
 public class AgentService : IAgentService
 {
+    private static readonly ILogger _logger = Log.ForContext<AgentService>();
+
     private readonly IAgentDataAccessService agentDataAccessService;
     private readonly IScriptEngineProvideFactory scriptEngineProvideFactory;
     private readonly ITerminalProviderFactory terminalProviderFactory;

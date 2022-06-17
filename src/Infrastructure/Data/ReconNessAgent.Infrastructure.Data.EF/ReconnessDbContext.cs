@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
 using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Domain.Core.Entities;
 using System.Linq.Expressions;
@@ -7,10 +9,6 @@ namespace ReconNessAgent.Infrastructure.Data.EF
 {
     public partial class ReconnessDbContext : DbContext, IDbContext
     {
-        public ReconnessDbContext()
-        {
-        }
-
         public ReconnessDbContext(DbContextOptions<ReconnessDbContext> options)
             : base(options)
         {
@@ -22,12 +20,6 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         public virtual DbSet<AgentRunnerCommandOutput> AgentRunnerCommandOutputs { get; set; } = null!;
         public virtual DbSet<AgentTrigger> AgentTriggers { get; set; } = null!;
         public virtual DbSet<AgentsSetting> AgentsSettings { get; set; } = null!;
-        public virtual DbSet<AspNetRole> AspNetRoles { get; set; } = null!;
-        public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; } = null!;
-        public virtual DbSet<AspNetUser> AspNetUsers { get; set; } = null!;
-        public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; } = null!;
-        public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; } = null!;
-        public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<Domain.Core.Entities.Directory> Directories { get; set; } = null!;
         public virtual DbSet<EventTrack> EventTracks { get; set; } = null!;
@@ -40,98 +32,279 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         public virtual DbSet<Subdomain> Subdomains { get; set; } = null!;
         public virtual DbSet<Target> Targets { get; set; } = null!;
 
-        public Task<bool> AnyAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
-        {
-            throw new NotImplementedException();
-        }
+        #region IDbContext
 
+        /// <summary>
+        /// A transaction Object
+        /// </summary>
+        private IDbContextTransaction transaction;
+
+        /// <inheritdoc/>
         public void BeginTransaction(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (transaction != null)
+            {
+                var dbTransaction = transaction.GetDbTransaction();
+                try
+                {
+                    if (dbTransaction != null && dbTransaction?.Connection != null && dbTransaction?.Connection?.State == System.Data.ConnectionState.Open)
+                    {
+                        return;
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+
+            this.transaction = this.Database.BeginTransaction();
         }
 
-        public Task<int> CommitAsync(CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public int Commit(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                this.BeginTransaction(cancellationToken);
+                var saveChanges = this.SaveChanges();
+                this.EndTransaction(cancellationToken);
+
+                return saveChanges;
+            }
+            catch (Exception)
+            {
+                this.Rollback(cancellationToken);
+                throw;
+            }
+            finally
+            {
+                // base.Dispose();
+            }
         }
 
-        public Task<TEntity> FindAsync<TEntity>(Guid id, CancellationToken cancellationToken = default) where TEntity : class
+        /// <inheritdoc/>
+        public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                this.BeginTransaction(cancellationToken);
+                var saveChangesAsync = await this.SaveChangesAsync(cancellationToken);
+                this.EndTransaction(cancellationToken);
+
+                return saveChangesAsync;
+            }
+            catch (Exception)
+            {
+                this.Rollback(cancellationToken);
+                throw;
+            }
+            finally
+            {
+                // base.Dispose();
+            }
         }
 
-        public Task<TEntity> FindByCriteriaAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TEntity> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
-        {
-            throw new NotImplementedException();
-        }
-
+        /// <inheritdoc/>
         public void Rollback(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (this.transaction != null && this.transaction.GetDbTransaction().Connection != null)
+            {
+                this.transaction.Rollback();
+            }
         }
 
+        /// <inheritdoc/>
+        private void EndTransaction(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            this.transaction.Commit();
+        }
+
+        /// <inheritdoc/>
         public void SetAsAdded<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            this.UpdateEntityState<TEntity>(entity, EntityState.Added, cancellationToken);
         }
 
+        /// <inheritdoc/>
         public void SetAsAdded<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            entities.ForEach(entity => this.SetAsAdded<TEntity>(entity, cancellationToken));
         }
 
-        public void SetAsDeleted<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetAsDeleted<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
-        {
-            throw new NotImplementedException();
-        }
-
+        /// <inheritdoc/>
         public void SetAsModified<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            this.UpdateEntityState<TEntity>(entity, EntityState.Modified, cancellationToken);
         }
 
+        /// <inheritdoc/>
         public void SetAsModified<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            entities.ForEach(entity => this.SetAsModified<TEntity>(entity, cancellationToken));
         }
 
+        /// <inheritdoc/>
+        public void SetAsDeleted<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            this.UpdateEntityState<TEntity>(entity, EntityState.Deleted, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public void SetAsDeleted<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            entities.ForEach(entity => this.SetAsDeleted<TEntity>(entity, cancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public Task<TEntity> FindAsync<TEntity>(Guid id, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return this.Set<TEntity>().FindAsync(id, cancellationToken).AsTask();
+        }
+
+        /// <inheritdoc/>
+        public Task<TEntity> FindByCriteriaAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return this.Set<TEntity>().Local.AsQueryable().FirstOrDefaultAsync(predicate, cancellationToken) ?? this.FirstOrDefaultAsync<TEntity>(predicate, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<TEntity> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return this.Set<TEntity>().FirstOrDefaultAsync(predicate, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public Task<List<TEntity>> ToListAsync<TEntity>(CancellationToken cancellationToken = default) where TEntity : class
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return this.Set<TEntity>().ToListAsync(cancellationToken);
         }
 
+        /// <inheritdoc/>
         public Task<List<TEntity>> ToListByCriteriaAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return this.Set<TEntity>().Where(predicate).ToListAsync<TEntity>(cancellationToken);
         }
 
+        /// <inheritdoc/>
+        public Task<bool> AnyAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return this.Set<TEntity>().AnyAsync(predicate, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public IQueryable<TEntity> ToQueryable<TEntity>() where TEntity : class
         {
-            throw new NotImplementedException();
+            return this.Set<TEntity>().AsQueryable();
         }
 
+        /// <inheritdoc/>
         public IQueryable<TEntity> ToQueryableByCriteria<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            throw new NotImplementedException();
+            return this.Set<TEntity>().Where(predicate).AsQueryable();
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        /// <summary>
+        /// Update entity state
+        /// </summary>
+        private void UpdateEntityState<TEntity>(TEntity entity, EntityState entityState, CancellationToken cancellationToken = default) where TEntity : class
         {
-            if (!optionsBuilder.IsConfigured)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var entityEntry = this.GetDbEntityEntrySafely<TEntity>(entity, cancellationToken);
+            if (entityEntry.State == EntityState.Unchanged)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseNpgsql("Host=localhost;Database=reconness;Username=postgres;Password=postgres;Persist Security Info=True");
+                entityEntry.State = entityState;
             }
+        }
+
+        /// <summary>
+        /// Attach entity
+        /// </summary>
+        private EntityEntry GetDbEntityEntrySafely<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var entityEntry = Entry<TEntity>(entity);
+            if (entityEntry.State == EntityState.Detached)
+            {
+                this.Set<TEntity>().Attach(entity);
+            }
+
+            return entityEntry;
+        }
+
+        #endregion IDbContext
+
+        /// <inheritdoc/>
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var changes = ChangeTracker.Entries<BaseEntity>()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+            foreach (var item in changes)
+            {
+                item.Property(p => p.UpdatedAt).CurrentValue = DateTime.UtcNow;
+
+                if (item.State == EntityState.Added)
+                {
+                    item.Property(p => p.CreatedAt).CurrentValue = DateTime.UtcNow;
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public override int SaveChanges()
+        {
+            var changes = ChangeTracker.Entries<BaseEntity>()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+            foreach (var item in changes)
+            {
+                item.Property(p => p.UpdatedAt).CurrentValue = DateTime.UtcNow;
+                if (item.State == EntityState.Added)
+                {
+                    item.Property(p => p.CreatedAt).CurrentValue = DateTime.UtcNow;
+                }
+            }
+
+            return base.SaveChanges();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -209,89 +382,6 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             modelBuilder.Entity<AgentsSetting>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<AspNetRole>(entity =>
-            {
-                entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
-                    .IsUnique();
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.Name).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedName).HasMaxLength(256);
-            });
-
-            modelBuilder.Entity<AspNetRoleClaim>(entity =>
-            {
-                entity.HasIndex(e => e.RoleId, "IX_AspNetRoleClaims_RoleId");
-
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.AspNetRoleClaims)
-                    .HasForeignKey(d => d.RoleId);
-            });
-
-            modelBuilder.Entity<AspNetUser>(entity =>
-            {
-                entity.HasIndex(e => e.NormalizedEmail, "EmailIndex");
-
-                entity.HasIndex(e => e.NormalizedUserName, "UserNameIndex")
-                    .IsUnique();
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.Email).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
-
-                entity.Property(e => e.UserName).HasMaxLength(256);
-
-                entity.HasMany(d => d.Roles)
-                    .WithMany(p => p.Users)
-                    .UsingEntity<Dictionary<string, object>>(
-                        "AspNetUserRole",
-                        l => l.HasOne<AspNetRole>().WithMany().HasForeignKey("RoleId"),
-                        r => r.HasOne<AspNetUser>().WithMany().HasForeignKey("UserId"),
-                        j =>
-                        {
-                            j.HasKey("UserId", "RoleId");
-
-                            j.ToTable("AspNetUserRoles");
-
-                            j.HasIndex(new[] { "RoleId" }, "IX_AspNetUserRoles_RoleId");
-                        });
-            });
-
-            modelBuilder.Entity<AspNetUserClaim>(entity =>
-            {
-                entity.HasIndex(e => e.UserId, "IX_AspNetUserClaims_UserId");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.AspNetUserClaims)
-                    .HasForeignKey(d => d.UserId);
-            });
-
-            modelBuilder.Entity<AspNetUserLogin>(entity =>
-            {
-                entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
-
-                entity.HasIndex(e => e.UserId, "IX_AspNetUserLogins_UserId");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.AspNetUserLogins)
-                    .HasForeignKey(d => d.UserId);
-            });
-
-            modelBuilder.Entity<AspNetUserToken>(entity =>
-            {
-                entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.AspNetUserTokens)
-                    .HasForeignKey(d => d.UserId);
             });
 
             modelBuilder.Entity<Category>(entity =>
