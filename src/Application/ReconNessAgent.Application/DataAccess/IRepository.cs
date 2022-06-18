@@ -50,7 +50,7 @@ public interface IRepository<TEntity> where TEntity : class
     /// <param name="predicate">The criteria</param>
     /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// <returns>Async list of Entities by criteria</returns>
-    Task<TEntity> GetByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<TEntity?> GetByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Obtain the entity by Id
@@ -58,7 +58,7 @@ public interface IRepository<TEntity> where TEntity : class
     /// <param name="id">The entity Id</param>
     /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// <returns>An Entity</returns>
-    Task<TEntity> FindAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<TEntity?> FindAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Obtain the entity by Id
@@ -66,47 +66,41 @@ public interface IRepository<TEntity> where TEntity : class
     /// <param name="predicate">The criteria</param>
     /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// <returns>An Entity</returns>
-    Task<TEntity> FindByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<TEntity?> FindByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Add a new Entity into the context
     /// </summary>
     /// <param name="entity">The new Entity</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void Add(TEntity entity, CancellationToken cancellationToken = default);
+    void Add(TEntity entity);
 
     /// <summary>
     ///  Add a list of Entities into the context
     /// </summary>
     /// <param name="entities">List of new Entities</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void AddRange(List<TEntity> entities, CancellationToken cancellationToken = default);
+    void AddRange(List<TEntity> entities);
 
     /// <summary>
     /// Update an Entity
     /// </summary>
     /// <param name="entity">The Entity</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void Update(TEntity entity, CancellationToken cancellationToken = default);
+    void Update(TEntity entity);
 
     /// <summary>
     /// Update a List of Entities
     /// </summary>
-    /// <param name="entities"></param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void UpdateRange(List<TEntity> entities, CancellationToken cancellationToken = default);
+    /// <param name="entities">The entities to update</param>
+    void UpdateRange(List<TEntity> entities);
 
     /// <summary>
     /// Delete an Entity
     /// </summary>
-    /// <param name="entity">The Entity</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void Delete(TEntity entity, CancellationToken cancellationToken = default);
+    /// <param name="entity">The Entity to delete</param>
+    void Delete(TEntity entity);
 
     /// <summary>
     /// Delete a list of Entities
     /// </summary>
-    /// <param name="entity"></param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void DeleteRange(List<TEntity> entities, CancellationToken cancellationToken = default);
+    /// <param name="entities">The entities to delete</param>
+    void DeleteRange(List<TEntity> entities);
 }

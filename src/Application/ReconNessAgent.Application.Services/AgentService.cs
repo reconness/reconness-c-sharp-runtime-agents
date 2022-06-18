@@ -54,10 +54,14 @@ public class AgentService : IAgentService
             if (unitOfWork != null)
             {
                 try
-                {
-                    unitOfWork.BeginTransaction();
+                {                    
                     var agentRunner = await this.agentDataAccessService.GetAgentRunnerAsync(unitOfWork, agentRunnerQueue.Channel, cancellationToken);
+                    if (agentRunner == null)
+                    {
+                        return;
+                    }
 
+                    unitOfWork.BeginTransaction();
                     // change channel stage to RUNNING if the stage is ENQUEUE on AgentRunner
                     if (agentRunner.Stage == AgentRunnerStage.ENQUEUE)
                     {
@@ -105,6 +109,11 @@ public class AgentService : IAgentService
         {
             // obtain the script from the Agent and the provider
             var script = await this.agentDataAccessService.GetAgentScriptAsync(unitOfWork, agentRunner, cancellationToken);
+            if (string.IsNullOrEmpty(script))
+            {
+                return;
+            }
+
             var scriptEngineProvider = this.scriptEngineProvideFactory.CreateScriptEngineProvider(script);
 
             agentRunnerCommandStatus = await RunTerminalAsync(unitOfWork, agentRunnerQueue, agentRunner, agentRunnerCommand, terminalProvider, scriptEngineProvider, cancellationToken);
@@ -146,7 +155,7 @@ public class AgentService : IAgentService
             cancellationToken.ThrowIfCancellationRequested();
 
             // check channel status if the agent stopped or failed break and stop the process on AgentRunner
-            if (await this.agentDataAccessService.HasAgentRunnerStageAsync(unitOfWork, agentRunner, new List<AgentRunnerStage> { AgentRunnerStage.STOPPED, AgentRunnerStage.FAILED }, cancellationToken))
+            if (new List<AgentRunnerStage> { AgentRunnerStage.STOPPED, AgentRunnerStage.FAILED }.Contains(agentRunner.Stage))
             {
                 return AgentRunnerCommandStatus.STOPPED;
             }
@@ -160,7 +169,7 @@ public class AgentService : IAgentService
                 await this.agentDataAccessService.SaveAgentRunnerCommandOutputAsync(unitOfWork, agentRunnerCommand, output, cancellationToken);
 
                 // save what we parse from the terminal output
-                await this.agentDataAccessService.SaveScriptOutputAsync(unitOfWork, agentRunner, outputParse, cancellationToken);
+                await this.agentDataAccessService.SaveScriptOutputParseAsync(unitOfWork, agentRunner, outputParse, cancellationToken);
             }
         }
 

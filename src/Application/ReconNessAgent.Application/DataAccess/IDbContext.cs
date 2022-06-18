@@ -11,43 +11,37 @@ public interface IDbContext
     /// Add an Entity
     /// </summary>
     /// <param name="entity">The Entity</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void SetAsAdded<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class;
+    void SetAsAdded<TEntity>(TEntity entity) where TEntity : class;
 
     /// <summary>
     /// Add an List of Entities
     /// </summary>
     /// <param name="entities">The List of Entities</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void SetAsAdded<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class;
+    void SetAsAdded<TEntity>(List<TEntity> entities) where TEntity : class;
 
     /// <summary>
     /// Update an Entity
     /// </summary>
     /// <param name="entity">The Entity</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void SetAsModified<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class;
+    void SetAsModified<TEntity>(TEntity entity) where TEntity : class;
 
     /// <summary>
     /// Update an List of Entities
     /// </summary>
     /// <param name="entities">The List of Entities</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void SetAsModified<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class;
+    void SetAsModified<TEntity>(List<TEntity> entities) where TEntity : class;
 
     /// <summary>
     /// Delete an Entity
     /// </summary>
     /// <param name="entity">The Entity</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void SetAsDeleted<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class;
+    void SetAsDeleted<TEntity>(TEntity entity) where TEntity : class;
 
     /// <summary>
     /// Delete an List of Entities
     /// </summary>
     /// <param name="entities">The List of Entities</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void SetAsDeleted<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class;
+    void SetAsDeleted<TEntity>(List<TEntity> entities) where TEntity : class;
 
     /// <summary>
     /// Obtain a list of async generic Entities
@@ -91,7 +85,7 @@ public interface IDbContext
     /// <param name="predicate">The criteria</param>
     /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// <returns>An Entity or default</returns>
-    Task<TEntity> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class;
+    Task<TEntity?> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class;
 
     /// <summary>
     /// Obtain the entity on memory by Id
@@ -99,7 +93,7 @@ public interface IDbContext
     /// <param name="id">The id</param>
     /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// <returns>An Entity</returns>
-    Task<TEntity> FindAsync<TEntity>(Guid id, CancellationToken cancellationToken = default) where TEntity : class;
+    Task<TEntity?> FindAsync<TEntity>(Guid id, CancellationToken cancellationToken = default) where TEntity : class;
 
     /// <summary>
     /// Obtain the entity on memory by criteria
@@ -107,13 +101,12 @@ public interface IDbContext
     /// <param name="predicate">The criteria</param>
     /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// <returns>An Entity</returns>
-    Task<TEntity> FindByCriteriaAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class;
+    Task<TEntity?> FindByCriteriaAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class;
 
     /// <summary>
     /// Begin an transaction
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// </summary>
-    void BeginTransaction(CancellationToken cancellationToken = default);
+    void BeginTransaction();
 
     /// <summary>
     ///  Do an async commit
@@ -125,6 +118,5 @@ public interface IDbContext
     /// <summary>
     /// Do a rollback
     /// </summary>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void Rollback(CancellationToken cancellationToken = default);
+    void Rollback();
 }

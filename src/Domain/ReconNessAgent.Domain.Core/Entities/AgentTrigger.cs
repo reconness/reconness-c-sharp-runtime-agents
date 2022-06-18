@@ -2,6 +2,9 @@
 
 public partial class AgentTrigger : BaseEntity
 {
+    public const string INCLUDE = "include";
+    public const string EXCLUDE = "exclude";
+
     public Guid Id { get; set; }
     public Guid AgentId { get; set; }
     public bool RootdomainHasBounty { get; set; }

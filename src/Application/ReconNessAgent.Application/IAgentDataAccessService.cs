@@ -17,7 +17,7 @@ public interface IAgentDataAccessService
     /// <param name="channel">The channel for the search.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>The <see cref="AgentRunner"/> entity.</returns>
-    Task<AgentRunner> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken);
+    Task<AgentRunner?> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken);
 
     /// <summary>
     /// Change the stage for the <see cref="AgentRunner"/> entity.
@@ -37,16 +37,6 @@ public interface IAgentDataAccessService
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>The script to use to parse the terminal output.</returns>
     Task<string> GetAgentScriptAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Verify the stage for the <see cref="AgentRunner"/>, if it has one of the list.
-    /// </summary>
-    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
-    /// <param name="agentRunner">The <see cref="AgentRunner"/> entity.</param>
-    /// <param name="agentRunStages">The list of stages that we want to check if the <see cref="AgentRunner"/> entity has.</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled.</param>
-    /// <returns>If it has one of the list.</returns>
-    Task<bool> HasAgentRunnerStageAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, List<AgentRunnerStage> agentRunStages, CancellationToken cancellationToken);
 
     /// <summary>
     /// Create an <see cref="AgentRunnerCommand"/> with the status RUNNING 
@@ -95,5 +85,5 @@ public interface IAgentDataAccessService
     /// <param name="outputParse">The script parsed.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A task.</returns>
-    Task SaveScriptOutputAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
+    Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
 }

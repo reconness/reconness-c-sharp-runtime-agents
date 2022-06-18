@@ -8,15 +8,13 @@ public interface IUnitOfWork
     /// <summary>
     /// Obtain a generic repository
     /// </summary>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
     /// <returns>A generic repository</returns>
-    IRepository<TEntity>? Repository<TEntity>(CancellationToken cancellationToken = default) where TEntity : class;
+    IRepository<TEntity> Repository<TEntity>() where TEntity : class;
 
     /// <summary>
     /// Begin a context transaction
     /// </summary>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void BeginTransaction(CancellationToken cancellationToken = default);
+    void BeginTransaction();
 
     /// <summary>
     /// Do the context commit async
@@ -28,6 +26,5 @@ public interface IUnitOfWork
     /// <summary>
     /// Rollback the context transaction
     /// </summary>
-    /// <param name="cancellationToken">Notification that operations should be canceled</param>
-    void Rollback(CancellationToken cancellationToken = default);
+    void Rollback();
 }

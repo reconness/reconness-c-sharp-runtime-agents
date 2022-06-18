@@ -26,31 +26,27 @@ public class UnitOfWork : IUnitOfWork
     }
 
     /// <inheritdoc/>
-    public IRepository<TEntity>? Repository<TEntity>(CancellationToken cancellationToken = default)
+    public IRepository<TEntity> Repository<TEntity>()
         where TEntity : class
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
         var type = typeof(TEntity).Name;
 
         if (this.repositories.ContainsKey(type))
         {
-            return repositories[type] as IRepository<TEntity>;
+            return (repositories[type] as IRepository<TEntity>)!;
         }
 
         var repositoryType = typeof(Repository<TEntity>);
 
         this.repositories.Add(type, Activator.CreateInstance(repositoryType, this.context));
 
-        return repositories[type] as IRepository<TEntity>;
+        return (repositories[type] as IRepository<TEntity>)!;
     }
 
     /// <inheritdoc/>
-    public void BeginTransaction(CancellationToken cancellationToken = default)
+    public void BeginTransaction()
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.BeginTransaction(cancellationToken);
+        this.context.BeginTransaction();
     }
 
     /// <inheritdoc/>
@@ -62,10 +58,8 @@ public class UnitOfWork : IUnitOfWork
     }
 
     /// <inheritdoc/>
-    public void Rollback(CancellationToken cancellationToken = default)
+    public void Rollback()
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.Rollback(cancellationToken);
+        this.context.Rollback();
     }
 }

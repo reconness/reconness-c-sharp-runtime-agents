@@ -1,4 +1,6 @@
-﻿namespace ReconNessAgent.Domain.Core.Entities;
+﻿using ReconNessAgent.Domain.Core.Enums;
+
+namespace ReconNessAgent.Domain.Core.Entities;
 
 public partial class AgentRunnerCommand : BaseEntity
 {
@@ -8,7 +10,7 @@ public partial class AgentRunnerCommand : BaseEntity
     }
 
     public Guid Id { get; set; }
-    public int Status { get; set; }
+    public AgentRunnerCommandStatus Status { get; set; }
     public string? Command { get; set; }
     public int Number { get; set; }
     public int Server { get; set; }

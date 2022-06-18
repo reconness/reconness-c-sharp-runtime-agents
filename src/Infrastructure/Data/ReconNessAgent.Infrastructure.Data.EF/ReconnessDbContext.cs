@@ -37,13 +37,11 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         /// <summary>
         /// A transaction Object
         /// </summary>
-        private IDbContextTransaction transaction;
+        private IDbContextTransaction? transaction;
 
         /// <inheritdoc/>
-        public void BeginTransaction(CancellationToken cancellationToken = default)
+        public void BeginTransaction()
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             if (transaction != null)
             {
                 var dbTransaction = transaction.GetDbTransaction();
@@ -64,21 +62,20 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         }
 
         /// <inheritdoc/>
-        public int Commit(CancellationToken cancellationToken = default)
+        public int Commit()
         {
-            cancellationToken.ThrowIfCancellationRequested();
 
             try
             {
-                this.BeginTransaction(cancellationToken);
+                this.BeginTransaction();
                 var saveChanges = this.SaveChanges();
-                this.EndTransaction(cancellationToken);
+                this.EndTransaction();
 
                 return saveChanges;
             }
             catch (Exception)
             {
-                this.Rollback(cancellationToken);
+                this.Rollback();
                 throw;
             }
             finally
@@ -94,15 +91,15 @@ namespace ReconNessAgent.Infrastructure.Data.EF
 
             try
             {
-                this.BeginTransaction(cancellationToken);
+                this.BeginTransaction();
                 var saveChangesAsync = await this.SaveChangesAsync(cancellationToken);
-                this.EndTransaction(cancellationToken);
+                this.EndTransaction();
 
                 return saveChangesAsync;
             }
             catch (Exception)
             {
-                this.Rollback(cancellationToken);
+                this.Rollback();
                 throw;
             }
             finally
@@ -112,10 +109,8 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         }
 
         /// <inheritdoc/>
-        public void Rollback(CancellationToken cancellationToken = default)
+        public void Rollback()
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             if (this.transaction != null && this.transaction.GetDbTransaction().Connection != null)
             {
                 this.transaction.Rollback();
@@ -123,63 +118,49 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         }
 
         /// <inheritdoc/>
-        private void EndTransaction(CancellationToken cancellationToken = default)
+        private void EndTransaction()
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             this.transaction.Commit();
         }
 
         /// <inheritdoc/>
-        public void SetAsAdded<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
+        public void SetAsAdded<TEntity>(TEntity entity) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            this.UpdateEntityState<TEntity>(entity, EntityState.Added, cancellationToken);
+            this.UpdateEntityState<TEntity>(entity, EntityState.Added);
         }
 
         /// <inheritdoc/>
-        public void SetAsAdded<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+        public void SetAsAdded<TEntity>(List<TEntity> entities) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            entities.ForEach(entity => this.SetAsAdded<TEntity>(entity, cancellationToken));
+            entities.ForEach(entity => this.SetAsAdded<TEntity>(entity));
         }
 
         /// <inheritdoc/>
-        public void SetAsModified<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
+        public void SetAsModified<TEntity>(TEntity entity) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            this.UpdateEntityState<TEntity>(entity, EntityState.Modified, cancellationToken);
+            this.UpdateEntityState<TEntity>(entity, EntityState.Modified);
         }
 
         /// <inheritdoc/>
-        public void SetAsModified<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+        public void SetAsModified<TEntity>(List<TEntity> entities) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            entities.ForEach(entity => this.SetAsModified<TEntity>(entity, cancellationToken));
+            entities.ForEach(entity => this.SetAsModified<TEntity>(entity));
         }
 
         /// <inheritdoc/>
-        public void SetAsDeleted<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
+        public void SetAsDeleted<TEntity>(TEntity entity) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            this.UpdateEntityState<TEntity>(entity, EntityState.Deleted, cancellationToken);
+            this.UpdateEntityState<TEntity>(entity, EntityState.Deleted);
         }
 
         /// <inheritdoc/>
-        public void SetAsDeleted<TEntity>(List<TEntity> entities, CancellationToken cancellationToken = default) where TEntity : class
+        public void SetAsDeleted<TEntity>(List<TEntity> entities) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            entities.ForEach(entity => this.SetAsDeleted<TEntity>(entity, cancellationToken));
+            entities.ForEach(entity => this.SetAsDeleted<TEntity>(entity));
         }
 
         /// <inheritdoc/>
-        public Task<TEntity> FindAsync<TEntity>(Guid id, CancellationToken cancellationToken = default) where TEntity : class
+        public Task<TEntity?> FindAsync<TEntity>(Guid id, CancellationToken cancellationToken = default) where TEntity : class
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -187,15 +168,15 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         }
 
         /// <inheritdoc/>
-        public Task<TEntity> FindByCriteriaAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
+        public Task<TEntity?> FindByCriteriaAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return this.Set<TEntity>().Local.AsQueryable().FirstOrDefaultAsync(predicate, cancellationToken) ?? this.FirstOrDefaultAsync<TEntity>(predicate, cancellationToken);
+            return this.Set<TEntity>().Local.AsQueryable().FirstOrDefaultAsync(predicate, cancellationToken) ?? this.FirstOrDefaultAsync(predicate, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public Task<TEntity> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
+        public Task<TEntity?> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) where TEntity : class
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -241,11 +222,9 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         /// <summary>
         /// Update entity state
         /// </summary>
-        private void UpdateEntityState<TEntity>(TEntity entity, EntityState entityState, CancellationToken cancellationToken = default) where TEntity : class
+        private void UpdateEntityState<TEntity>(TEntity entity, EntityState entityState) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var entityEntry = this.GetDbEntityEntrySafely<TEntity>(entity, cancellationToken);
+            var entityEntry = this.GetDbEntityEntrySafely<TEntity>(entity);
             if (entityEntry.State == EntityState.Unchanged)
             {
                 entityEntry.State = entityState;
@@ -255,10 +234,8 @@ namespace ReconNessAgent.Infrastructure.Data.EF
         /// <summary>
         /// Attach entity
         /// </summary>
-        private EntityEntry GetDbEntityEntrySafely<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
+        private EntityEntry GetDbEntityEntrySafely<TEntity>(TEntity entity) where TEntity : class
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             var entityEntry = Entry<TEntity>(entity);
             if (entityEntry.State == EntityState.Detached)
             {
@@ -344,7 +321,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             {
                 entity.HasIndex(e => e.AgentRunnerId, "IX_AgentRunnerCommands_AgentRunnerId");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.AgentRunner)
                     .WithMany(p => p.AgentRunnerCommands)
@@ -355,7 +332,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             {
                 entity.HasIndex(e => e.AgentRunnerCommandId, "IX_AgentRunnerCommandOutputs_AgentRunnerCommandId");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.AgentRunnerCommand)
                     .WithMany(p => p.AgentRunnerCommandOutputs)

@@ -60,7 +60,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     /// <inheritdoc/>
-    public Task<TEntity> GetByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public Task<TEntity?> GetByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -68,7 +68,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     /// <inheritdoc/>
-    public Task<TEntity> FindByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public Task<TEntity?> FindByCriteriaAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -76,7 +76,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     /// <inheritdoc/>
-    public Task<TEntity> FindAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<TEntity?> FindAsync(Guid id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -84,50 +84,38 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     /// <inheritdoc/>
-    public void Add(TEntity entity, CancellationToken cancellationToken = default)
+    public void Add(TEntity entity)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.SetAsAdded<TEntity>(entity, cancellationToken);
+        this.context.SetAsAdded<TEntity>(entity);
     }
 
     /// <inheritdoc/>
-    public void AddRange(List<TEntity> entities, CancellationToken cancellationToken = default)
+    public void AddRange(List<TEntity> entities)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.SetAsAdded<TEntity>(entities, cancellationToken);
+        this.context.SetAsAdded<TEntity>(entities);
     }
 
     /// <inheritdoc/>
-    public void Update(TEntity entity, CancellationToken cancellationToken = default)
+    public void Update(TEntity entity)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.SetAsModified<TEntity>(entity, cancellationToken);
+        this.context.SetAsModified<TEntity>(entity);
     }
 
     /// <inheritdoc/>
-    public void UpdateRange(List<TEntity> entities, CancellationToken cancellationToken = default)
+    public void UpdateRange(List<TEntity> entities)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.SetAsModified<TEntity>(entities, cancellationToken);
+        this.context.SetAsModified<TEntity>(entities);
     }
 
     /// <inheritdoc/>
-    public void Delete(TEntity entity, CancellationToken cancellationToken = default)
+    public void Delete(TEntity entity)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.SetAsDeleted<TEntity>(entity, cancellationToken);
+        this.context.SetAsDeleted<TEntity>(entity);
     }
 
     /// <inheritdoc/>
-    public void DeleteRange(List<TEntity> entities, CancellationToken cancellationToken = default)
+    public void DeleteRange(List<TEntity> entities)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        this.context.SetAsDeleted<TEntity>(entities, cancellationToken);
+        this.context.SetAsDeleted<TEntity>(entities);
     }
 }
