@@ -1,9 +1,9 @@
 ﻿using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Models;
-using ReconNessAgent.Application.Models.Enums;
 using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
-using System.Text.RegularExpressions;
+using ReconNessAgent.Domain.Core.ValueObjects;
+using System.Net;
 
 namespace ReconNessAgent.Application.Services;
 
@@ -76,29 +76,360 @@ public class AgentDataAccessService : IAgentDataAccessService
     }
 
     /// <inheritdoc/>
-    public async Task<bool> CanSkipAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
+    public bool CanSkipAgentRunnerCommand(Channel channel, AgentRunnerCommand agentRunnerCommand)
     {
-        var channel = agentRunnerCommand.AgentRunner.Channel;
-        var (agent, target, rootDomain, subdomain) = await FromChannelAsync(channel, cancellationToken);
-
-        return agentRunnerCommand.AgentRunner.CanSkip(agent, target, rootDomain, subdomain);
+        return agentRunnerCommand.AgentRunner.CanSkip(channel.Value.Agent, channel.Value.Target, channel.Value.RootDomain, channel.Value.Subdomain);
     }
 
     /// <inheritdoc/>
-    public Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken)
+    public async Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, Channel channel, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var agent = channel.Value.Agent;
+        var target = channel.Value.Target;
+        var rootDomain = channel.Value.RootDomain;
+        var subdomain = channel.Value.Subdomain;
+
+        if (rootDomain == null)
+        {
+            if (await this.NeedAddNewRootDomain(unitOfWork, target!, outputParse.RootDomain, cancellationToken))
+            {
+                rootDomain = await this.AddTargetNewRootDomainAsync(unitOfWork, target!, outputParse.RootDomain!, cancellationToken);
+            }
+        }
+
+        if (rootDomain != null)
+        {
+            // if we have a new rootdomain
+            if (!string.IsNullOrEmpty(outputParse.RootDomain) && !outputParse.RootDomain.Equals(rootDomain.Name))
+            {
+                await this.AddTargetNewRootDomainAsync(unitOfWork, target!, outputParse.RootDomain!, cancellationToken);
+            }
+
+            if (await this.NeedAddNewSubdomain(unitOfWork, rootDomain, outputParse.Subdomain, cancellationToken))
+            {
+                subdomain = await this.AddRootDomainNewSubdomainAsync(unitOfWork, rootDomain, outputParse.Subdomain!, agent!.Name!, cancellationToken);
+            }
+
+            if (subdomain != null)
+            {
+                // if we have a new subdomain
+                if (!string.IsNullOrEmpty(outputParse.Subdomain) && !outputParse.Subdomain.Equals(subdomain.Name) &&
+                    !await this.NeedAddNewSubdomain(unitOfWork, rootDomain, outputParse.Subdomain, cancellationToken))
+                {
+                    await this.AddRootDomainNewSubdomainAsync(unitOfWork, rootDomain, outputParse.Subdomain!, agent!.Name!, cancellationToken);
+                }
+
+                if (!string.IsNullOrEmpty(outputParse.Ip))
+                {
+                    await this.UpdateSubdomainIpAddressAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+
+                if (outputParse.IsAlive != null)
+                {
+                    await this.UpdateSubdomainIsAliveAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+
+                if (outputParse.HasHttpOpen != null)
+                {
+                    await this.UpdateSubdomainHasHttpOpenAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+
+                if (outputParse.Takeover != null)
+                {
+                    await this.UpdateSubdomainTakeoverAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+
+                if (!string.IsNullOrEmpty(outputParse.HttpDirectory))
+                {
+                    await this.UpdateSubdomainDirectoryAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+
+                if (!string.IsNullOrEmpty(outputParse.Service))
+                {
+                    await this.UpdateSubdomainServiceAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+
+                if (!string.IsNullOrEmpty(outputParse.Technology))
+                {
+                    await this.UpdateSubdomainTechnologyAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+
+                if (!string.IsNullOrWhiteSpace(outputParse.Label))
+                {
+                    await this.UpdateSubdomainLabelAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+                }
+            }
+        }
     }
 
     /// <summary>
-    /// 
+    /// If we need to add a new RootDomain
     /// </summary>
-    /// <param name="channel"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    private Task<(Agent, Target, RootDomain, Subdomain)> FromChannelAsync(string? channel, CancellationToken cancellationToken)
+    /// <param name="target">The Target</param>
+    /// <param name="rootDomain">The root domain</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    /// <returns>If we need to add a new RootDomain</returns>
+    private async ValueTask<bool> NeedAddNewRootDomain(IUnitOfWork unitOfWork, Target target, string? rootDomain, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-    }    
+        if (string.IsNullOrEmpty(rootDomain))
+        {
+            return false;
+        }
+
+        var existRootDomain = await unitOfWork.Repository<RootDomain>().AnyAsync(r => r.Target == target && r.Name == rootDomain, cancellationToken);
+        return !existRootDomain;
+    }
+
+    /// <summary>
+    /// Add a new root domain in the target
+    /// </summary>
+    /// <param name="target">The target to add the new root domain</param>
+    /// <param name="rootDomain">The new root domain</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    /// <returns>The new root domain added</returns>
+    private async Task<RootDomain> AddTargetNewRootDomainAsync(IUnitOfWork unitOfWork, Target target, string rootDomain, CancellationToken cancellationToken)
+    {
+        var newRootDomain = new RootDomain
+        {
+            Name = rootDomain,
+            Target = target
+        };
+
+        unitOfWork.Repository<RootDomain>().Add(newRootDomain);
+        await unitOfWork.CommitAsync(cancellationToken);
+
+        return newRootDomain;
+    }
+
+    /// <summary>
+    /// If we need to add a new subdomain
+    /// </summary>
+    /// <param name="rootDomain">The root domain</param>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    /// <returns>If we need to add a new RootDomain</returns>
+    private async ValueTask<bool> NeedAddNewSubdomain(IUnitOfWork unitOfWork, RootDomain rootDomain, string? subdomain, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(subdomain) || Uri.CheckHostName(subdomain) == UriHostNameType.Unknown)
+        {
+            return false;
+        }
+
+        var existSubdomain = await unitOfWork.Repository<Subdomain>().AnyAsync(s => s.RootDomain == rootDomain && s.Name == subdomain, cancellationToken);
+        return !existSubdomain;
+    }
+
+    /// <summary>
+    /// Add a new subdomain in the target
+    /// </summary>
+    /// <param name="target">The target</param>
+    /// <param name="rootDomain">The root domain to add the new subdomain</param>
+    /// <param name="subdomain">The new root domain</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    /// <returns>The new subdomain added</returns>
+    private async Task<Subdomain> AddRootDomainNewSubdomainAsync(IUnitOfWork unitOfWork, RootDomain rootDomain, string subdomain, string agentName, CancellationToken cancellationToken)
+    {
+        var newSubdomain = new Subdomain
+        {
+            Name = subdomain,
+            AgentsRanBefore = agentName,
+            RootDomain = rootDomain
+        };
+
+        unitOfWork.Repository<Subdomain>().Add(newSubdomain);
+        await unitOfWork.CommitAsync(cancellationToken);
+
+        return newSubdomain;
+    }
+
+    /// <summary>
+    /// IP4 validation
+    /// </summary>
+    /// <param name="ipString">The Ip to validate</param>
+    /// <returns>If is a valid IP</returns>
+    private static bool ValidateIPv4(string ipString)
+    {
+        if (string.IsNullOrWhiteSpace(ipString) || ipString.Count(c => c == '.') != 3)
+        {
+            return false;
+        }
+
+        return IPAddress.TryParse(ipString, out IPAddress address);
+    }
+
+    /// <summary>
+    /// Assign Ip address to the subdomain
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainIpAddressAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken = default)
+    {
+        if (ValidateIPv4(scriptOutput.Ip) && subdomain.IpAddress != scriptOutput.Ip)
+        {
+            subdomain.IpAddress = scriptOutput.Ip;
+            unitOfWork.Repository<Subdomain>().Update(subdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain if is Alive
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainIsAliveAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken = default)
+    {
+        if (subdomain.IsAlive != scriptOutput.IsAlive)
+        {
+            subdomain.IsAlive = scriptOutput.IsAlive.Value;
+            unitOfWork.Repository<Subdomain>().Update(subdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain if it has http port open
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainHasHttpOpenAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken = default)
+    {
+        if (subdomain.HasHttpOpen != scriptOutput.HasHttpOpen.Value)
+        {
+            subdomain.HasHttpOpen = scriptOutput.HasHttpOpen.Value;
+            unitOfWork.Repository<Subdomain>().Update(subdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain if it can be takeover
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainTakeoverAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken = default)
+    {
+        if (subdomain.Takeover != scriptOutput.Takeover.Value)
+        {
+            subdomain.Takeover = scriptOutput.Takeover.Value;
+            unitOfWork.Repository<Subdomain>().Update(subdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain with directory discovery
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainDirectoryAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken = default)
+    {
+        var httpDirectory = scriptOutput.HttpDirectory.TrimEnd('/').TrimEnd();
+        if (subdomain.Directories == null)
+        {
+            subdomain.Directories = new List<Domain.Core.Entities.Directory>();
+        }
+
+
+        if (subdomain.Directories.Any(d => d.Uri == httpDirectory))
+        {
+            return;
+        }
+
+        var directory = new Domain.Core.Entities.Directory()
+        {
+            Uri = httpDirectory,
+            StatusCode = scriptOutput.HttpDirectoryStatusCode,
+            Method = scriptOutput.HttpDirectoryMethod,
+            Size = scriptOutput.HttpDirectorySize
+        };
+
+        subdomain.Directories.Add(directory);
+        unitOfWork.Repository<Subdomain>().Update(subdomain);
+        await unitOfWork.CommitAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Update the subdomain if is a new service with open port
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainServiceAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken = default)
+    {
+        if (subdomain.Services == null)
+        {
+            subdomain.Services = new List<Service>();
+        }
+
+        var service = new Service
+        {
+            Name = scriptOutput.Service.ToLower(),
+            Port = scriptOutput.Port.Value
+        };
+
+        if (!subdomain.Services.Any(s => s.Name == service.Name && s.Port == service.Port))
+        {
+            subdomain.Services.Add(service);
+            unitOfWork.Repository<Subdomain>().Update(subdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain Technology
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainTechnologyAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrEmpty(scriptOutput.Technology) && !scriptOutput.Technology.Equals(subdomain.Technology, StringComparison.OrdinalIgnoreCase))
+        {
+            subdomain.Technology = scriptOutput.Technology;
+            unitOfWork.Repository<Subdomain>().Update(subdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain label
+    /// </summary>
+    /// <param name="subdomain">The subdomain</param>
+    /// <param name="scriptOutput">The terminal output one line</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled</param>
+    /// <returns>A task</returns>
+    private async ValueTask UpdateSubdomainLabelAsync(IUnitOfWork unitOfWork, Subdomain subdomain, TerminalOutputParse scriptOutput, CancellationToken cancellationToken = default)
+    {
+        if (!subdomain.Labels.Any(l => scriptOutput.Label.Equals(l.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            var label = await unitOfWork.Repository<Label>().GetByCriteriaAsync(l => l.Name.ToLower() == scriptOutput.Label.ToLower(), cancellationToken);
+            if (label == null)
+            {
+                var random = new Random();
+                label = new Label
+                {
+                    Name = scriptOutput.Label,
+                    Color = string.Format("#{0:X6}", random.Next(0x1000000))
+                };
+            }
+
+            subdomain.Labels.Add(label);
+
+            unitOfWork.Repository<Subdomain>().Update(subdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+    }
 }

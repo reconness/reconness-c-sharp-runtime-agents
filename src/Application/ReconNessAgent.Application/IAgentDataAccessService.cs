@@ -3,6 +3,7 @@ using ReconNessAgent.Application.Models;
 using ReconNessAgent.Domain.Core;
 using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
+using ReconNessAgent.Domain.Core.ValueObjects;
 
 namespace ReconNessAgent.Application;
 
@@ -71,19 +72,19 @@ public interface IAgentDataAccessService
     /// <summary>
     /// Verify if we can skip the current command, because we ran the same command before.
     /// </summary>
-    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
+    /// <param name="channel"><see cref="Channel"/></param>
     /// <param name="agentRunnerCommand">The <see cref="AgentRunnerCommand"/> entity</param>
-    /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>If we can skip the current command</returns>
-    Task<bool> CanSkipAgentRunnerCommandAsync(IUnitOfWork unitOfWork, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken);
+    bool CanSkipAgentRunnerCommand(Channel channel, AgentRunnerCommand agentRunnerCommand);
 
     /// <summary>
     /// Save what we found parsing the terminal output using the agent script.
     /// </summary>
     /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
+    /// <param name="channel"><see cref="Channel"/></param>
     /// <param name="agentRunner">The <see cref="AgentRunner"/> entity.</param>
     /// <param name="outputParse">The script parsed.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A task.</returns>
-    Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
+    Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, Channel channel, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
 }

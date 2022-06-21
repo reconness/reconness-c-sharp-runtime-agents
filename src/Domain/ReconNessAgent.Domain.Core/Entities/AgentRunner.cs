@@ -26,13 +26,14 @@ public partial class AgentRunner : BaseEntity
     /// </summary>
     /// <param name="agentRunner">The agent runner</param>
     /// <param name="agentRunnerType">The agent runner type</param>
-    public bool CanSkip(Agent agent, Target target, RootDomain rootDomain, Subdomain subdomain)
+    public bool CanSkip(Agent? agent, Target? target, RootDomain? rootDomain, Subdomain? subdomain)
     {
-        var agentTrigger = agent.AgentTrigger;
-        if (agentTrigger == null)
+        if (agent == null || agent.AgentTrigger == null)
         {
             return false;
         }
+
+        var agentTrigger = agent.AgentTrigger;
 
         var agentTypeTarget = AgentRunnerTypes.CURRENT_TARGET.Equals(this.AgentRunnerType) || AgentRunnerTypes.ALL_DIRECTORIES.Equals(this.AgentRunnerType);
         var agentTypeRootDomain = AgentRunnerTypes.CURRENT_ROOTDOMAIN.Equals(this.AgentRunnerType) || AgentRunnerTypes.ALL_ROOTDOMAINS.Equals(this.AgentRunnerType);
@@ -52,7 +53,7 @@ public partial class AgentRunner : BaseEntity
     /// <param name="agentTypeRootDomain">if is the RootDomain the agent type</param>
     /// <param name="agentTypeSubdomain">if is the Subdomain the agent type</param>
     /// <returns>If ran before (target, rootdomain, subdomain)></returns>
-    private bool RanBefore(Agent agent, Target target, RootDomain rootDomain, Subdomain subdomain, bool agentTypeTarget, bool agentTypeRootDomain, bool agentTypeSubdomain)
+    private bool RanBefore(Agent agent, Target? target, RootDomain? rootDomain, Subdomain? subdomain, bool agentTypeTarget, bool agentTypeRootDomain, bool agentTypeSubdomain)
     {
         var agentRanBeforeInThisTarget = agentTypeTarget && target != null &&
                                              !string.IsNullOrEmpty(target.AgentsRanBefore) &&

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ValueOf" Version="2.0.31" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Infrastructure\ReconNessAgent.Infrastructure\ReconNessAgent.Infrastructure.csproj" />
     <ProjectReference Include="..\ReconNessAgent.Application\ReconNessAgent.Application.csproj" />
   </ItemGroup>

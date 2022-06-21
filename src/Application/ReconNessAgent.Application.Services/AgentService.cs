@@ -5,6 +5,7 @@ using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Providers;
 using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
+using ReconNessAgent.Domain.Core.ValueObjects;
 using Serilog;
 using System.Text.Json;
 
@@ -54,12 +55,14 @@ public class AgentService : IAgentService
             if (unitOfWork != null)
             {
                 try
-                {                    
+                {   
                     var agentRunner = await this.agentDataAccessService.GetAgentRunnerAsync(unitOfWork, agentRunnerQueue.Channel, cancellationToken);
                     if (agentRunner == null)
                     {
                         return;
                     }
+
+                    var channel = await FromChannelAsync(unitOfWork, agentRunnerQueue.Channel, cancellationToken);
 
                     unitOfWork.BeginTransaction();
                     // change channel stage to RUNNING if the stage is ENQUEUE on AgentRunner
@@ -72,13 +75,13 @@ public class AgentService : IAgentService
                     var agentRunnerCommand = await this.agentDataAccessService.CreateAgentRunnerCommandAsync(unitOfWork, agentRunner, agentRunnerQueue, cancellationToken);
 
                     // if we can skip this agent runner command, change status to SKIPPED
-                    if (agentRunner.AllowSkip && await this.agentDataAccessService.CanSkipAgentRunnerCommandAsync(unitOfWork, agentRunnerCommand, cancellationToken))
+                    if (agentRunner.AllowSkip && this.agentDataAccessService.CanSkipAgentRunnerCommand(channel, agentRunnerCommand))
                     {
                         await this.agentDataAccessService.ChangeAgentRunnerCommandStatusAsync(unitOfWork, agentRunnerCommand, AgentRunnerCommandStatus.SKIPPED, cancellationToken);
                         return;
                     }
 
-                    await RunInternalAsync(unitOfWork, agentRunnerQueue, agentRunner, agentRunnerCommand, cancellationToken);
+                    await RunInternalAsync(unitOfWork, channel, agentRunnerQueue, agentRunner, agentRunnerCommand, cancellationToken);
 
                     await unitOfWork.CommitAsync();
                 }
@@ -91,6 +94,53 @@ public class AgentService : IAgentService
     }
 
     /// <summary>
+    /// Decompose the channel into agent, target, rootdomain and subdomain
+    /// 
+    /// Ex:
+    /// #20220319.1_nmap_yahoo_yahoo.com_www.yahoo.com
+    /// </summary>
+    /// <param name="channel">The channel</param>
+    /// <param name="unitOfWork">The UnitOfWork</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled.</param>
+    /// <returns>An agent, target, rootdomain and subdomain</returns>
+    private async Task<Channel> FromChannelAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken)
+    {
+        var concepts = channel.Split('_');
+
+        var targetName = concepts[2];
+        var agentName = concepts[1];
+
+        var subdomainName = string.Empty;
+        var rootdomainName = string.Empty;
+        if (concepts.Length > 3)
+        {
+            rootdomainName = concepts[3];
+        }
+
+        if (concepts.Length > 4)
+        {
+            subdomainName = concepts[4];
+        }
+
+        Subdomain? subdomain = default;
+        if (!string.IsNullOrEmpty(subdomainName))
+        {
+            subdomain = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(s => s.Name == subdomainName, cancellationToken);
+        }
+
+        RootDomain? rootDomain = default;
+        if (!string.IsNullOrEmpty(rootdomainName))
+        {
+            rootDomain = await unitOfWork.Repository<RootDomain>().GetByCriteriaAsync(s => s.Name == rootdomainName, cancellationToken);
+        }
+
+        var target = await unitOfWork.Repository<Target>().GetByCriteriaAsync(s => s.Name == targetName, cancellationToken);
+        var agent = await unitOfWork.Repository<Agent>().GetByCriteriaAsync(s => s.Name == agentName, cancellationToken);
+
+        return Channel.From((agent!, target!, rootDomain, subdomain));
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="unitOfWork"></param>
@@ -99,7 +149,7 @@ public class AgentService : IAgentService
     /// <param name="agentRunnerCommand"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task RunInternalAsync(IUnitOfWork unitOfWork, AgentRunnerQueue agentRunnerQueue, AgentRunner agentRunner, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
+    private async Task RunInternalAsync(IUnitOfWork unitOfWork, Channel channel, AgentRunnerQueue agentRunnerQueue, AgentRunner agentRunner, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
     {
         var terminalProvider = this.terminalProviderFactory.CreateTerminalProvider();
 
@@ -116,7 +166,7 @@ public class AgentService : IAgentService
 
             var scriptEngineProvider = this.scriptEngineProvideFactory.CreateScriptEngineProvider(script);
 
-            agentRunnerCommandStatus = await RunTerminalAsync(unitOfWork, agentRunnerQueue, agentRunner, agentRunnerCommand, terminalProvider, scriptEngineProvider, cancellationToken);
+            agentRunnerCommandStatus = await RunTerminalAsync(unitOfWork, channel, agentRunnerQueue, agentRunner, agentRunnerCommand, terminalProvider, scriptEngineProvider, cancellationToken);
         }
         catch (Exception)
         {
@@ -140,6 +190,7 @@ public class AgentService : IAgentService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     private async Task<AgentRunnerCommandStatus> RunTerminalAsync(IUnitOfWork unitOfWork,
+                                                                  Channel channel,
                                                                   AgentRunnerQueue agentRunnerQueue,
                                                                   AgentRunner agentRunner,
                                                                   AgentRunnerCommand agentRunnerCommand,
@@ -169,7 +220,7 @@ public class AgentService : IAgentService
                 await this.agentDataAccessService.SaveAgentRunnerCommandOutputAsync(unitOfWork, agentRunnerCommand, output, cancellationToken);
 
                 // save what we parse from the terminal output
-                await this.agentDataAccessService.SaveScriptOutputParseAsync(unitOfWork, agentRunner, outputParse, cancellationToken);
+                await this.agentDataAccessService.SaveScriptOutputParseAsync(unitOfWork, channel, agentRunner, outputParse, cancellationToken);
             }
         }
 
