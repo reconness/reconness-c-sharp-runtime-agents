@@ -89,77 +89,76 @@ public class AgentDataAccessService : IAgentDataAccessService
         var rootDomain = channel.Value.RootDomain;
         var subdomain = channel.Value.Subdomain;
 
-        if (rootDomain == null)
+        // TODO: We are missing save targets!
+
+        var agentTypeTarget = "Target".Equals(agent.AgentType);
+        var agentTypeRootDomain = "RootDomain".Equals(agent.AgentType);
+        var agentTypeSubdomain = "Subdomain".Equals(agent.AgentType);
+
+        if (agentTypeTarget)
         {
             if (await this.NeedAddNewRootDomain(unitOfWork, target!, outputParse.RootDomain, cancellationToken))
             {
-                rootDomain = await this.AddTargetNewRootDomainAsync(unitOfWork, target!, outputParse.RootDomain!, cancellationToken);
-            }
-        }
-
-        if (rootDomain != null)
-        {
-            // if we have a new rootdomain
-            if (!string.IsNullOrEmpty(outputParse.RootDomain) && !outputParse.RootDomain.Equals(rootDomain.Name))
-            {
                 await this.AddTargetNewRootDomainAsync(unitOfWork, target!, outputParse.RootDomain!, cancellationToken);
             }
-
+        }
+        else if (agentTypeRootDomain && rootDomain != null)
+        {
             if (await this.NeedAddNewSubdomain(unitOfWork, rootDomain, outputParse.Subdomain, cancellationToken))
             {
                 subdomain = await this.AddRootDomainNewSubdomainAsync(unitOfWork, rootDomain, outputParse.Subdomain!, agent!.Name!, cancellationToken);
             }
-
-            if (subdomain != null)
+        }
+        else if (agentTypeSubdomain && subdomain != null)
+        {
+            // if we have a new subdomain
+            if (!string.IsNullOrEmpty(outputParse.Subdomain) && !outputParse.Subdomain.Equals(subdomain.Name) &&
+                !await this.NeedAddNewSubdomain(unitOfWork, rootDomain, outputParse.Subdomain, cancellationToken))
             {
-                // if we have a new subdomain
-                if (!string.IsNullOrEmpty(outputParse.Subdomain) && !outputParse.Subdomain.Equals(subdomain.Name) &&
-                    !await this.NeedAddNewSubdomain(unitOfWork, rootDomain, outputParse.Subdomain, cancellationToken))
-                {
-                    await this.AddRootDomainNewSubdomainAsync(unitOfWork, rootDomain, outputParse.Subdomain!, agent!.Name!, cancellationToken);
-                }
+                await this.AddRootDomainNewSubdomainAsync(unitOfWork, rootDomain, outputParse.Subdomain!, agent!.Name!, cancellationToken);
+            }
 
-                if (!string.IsNullOrEmpty(outputParse.Ip))
-                {
-                    await this.UpdateSubdomainIpAddressAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (!string.IsNullOrEmpty(outputParse.Ip))
+            {
+                await this.UpdateSubdomainIpAddressAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+            }
 
-                if (outputParse.IsAlive != null)
-                {
-                    await this.UpdateSubdomainIsAliveAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (outputParse.IsAlive != null)
+            {
+                await this.UpdateSubdomainIsAliveAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+            }
 
-                if (outputParse.HasHttpOpen != null)
-                {
-                    await this.UpdateSubdomainHasHttpOpenAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (outputParse.HasHttpOpen != null)
+            {
+                await this.UpdateSubdomainHasHttpOpenAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+            }
 
-                if (outputParse.Takeover != null)
-                {
-                    await this.UpdateSubdomainTakeoverAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (outputParse.Takeover != null)
+            {
+                await this.UpdateSubdomainTakeoverAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+            }
 
-                if (!string.IsNullOrEmpty(outputParse.HttpDirectory))
-                {
-                    await this.UpdateSubdomainDirectoryAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (!string.IsNullOrEmpty(outputParse.HttpDirectory))
+            {
+                await this.UpdateSubdomainDirectoryAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+            }
 
-                if (!string.IsNullOrEmpty(outputParse.Service))
-                {
-                    await this.UpdateSubdomainServiceAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (!string.IsNullOrEmpty(outputParse.Service))
+            {
+                await this.UpdateSubdomainServiceAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+            }
 
-                if (!string.IsNullOrEmpty(outputParse.Technology))
-                {
-                    await this.UpdateSubdomainTechnologyAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (!string.IsNullOrEmpty(outputParse.Technology))
+            {
+                await this.UpdateSubdomainTechnologyAsync(unitOfWork, subdomain, outputParse, cancellationToken);
+            }
 
-                if (!string.IsNullOrWhiteSpace(outputParse.Label))
-                {
-                    await this.UpdateSubdomainLabelAsync(unitOfWork, subdomain, outputParse, cancellationToken);
-                }
+            if (!string.IsNullOrWhiteSpace(outputParse.Label))
+            {
+                await this.UpdateSubdomainLabelAsync(unitOfWork, subdomain, outputParse, cancellationToken);
             }
         }
+        
     }
 
     /// <summary>

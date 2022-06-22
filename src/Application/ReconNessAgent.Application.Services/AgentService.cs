@@ -62,9 +62,10 @@ public class AgentService : IAgentService
                         return;
                     }
 
-                    var channel = await FromChannelAsync(unitOfWork, agentRunnerQueue.Channel, cancellationToken);
-
                     unitOfWork.BeginTransaction();
+
+                    var channel = await FromChannelCompositionAsync(unitOfWork, agentRunnerQueue, cancellationToken);
+                    
                     // change channel stage to RUNNING if the stage is ENQUEUE on AgentRunner
                     if (agentRunner.Stage == AgentRunnerStage.ENQUEUE)
                     {
@@ -98,14 +99,15 @@ public class AgentService : IAgentService
     /// 
     /// Ex:
     /// #20220319.1_nmap_yahoo_yahoo.com_www.yahoo.com
+    /// #20220319.1_nmap_yahoo_yahoo.com_all
     /// </summary>
     /// <param name="channel">The channel</param>
     /// <param name="unitOfWork">The UnitOfWork</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>An agent, target, rootdomain and subdomain</returns>
-    private async Task<Channel> FromChannelAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken)
+    private async Task<Channel> FromChannelCompositionAsync(IUnitOfWork unitOfWork, AgentRunnerQueue agentRunnerQueue, CancellationToken cancellationToken)
     {
-        var concepts = channel.Split('_');
+        var concepts = agentRunnerQueue.Channel.Split('_');
 
         var targetName = concepts[2];
         var agentName = concepts[1];
@@ -114,12 +116,12 @@ public class AgentService : IAgentService
         var rootdomainName = string.Empty;
         if (concepts.Length > 3)
         {
-            rootdomainName = concepts[3];
+            rootdomainName = "all".Equals(concepts[3]) ? agentRunnerQueue .Payload : concepts[3];
         }
 
         if (concepts.Length > 4)
         {
-            subdomainName = concepts[4];
+            subdomainName = "all".Equals(concepts[4]) ? agentRunnerQueue.Payload : concepts[4];
         }
 
         Subdomain? subdomain = default;

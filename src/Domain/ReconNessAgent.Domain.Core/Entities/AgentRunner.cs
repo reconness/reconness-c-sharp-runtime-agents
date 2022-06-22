@@ -14,7 +14,6 @@ public partial class AgentRunner : BaseEntity
     public AgentRunnerStage Stage { get; set; }
     public Guid AgentId { get; set; }
     public bool ActivateNotification { get; set; }
-    public string? AgentRunnerType { get; set; }
     public bool AllowSkip { get; set; }
     public int Total { get; set; }
 
@@ -35,10 +34,9 @@ public partial class AgentRunner : BaseEntity
 
         var agentTrigger = agent.AgentTrigger;
 
-        var agentTypeTarget = AgentRunnerTypes.CURRENT_TARGET.Equals(this.AgentRunnerType) || AgentRunnerTypes.ALL_DIRECTORIES.Equals(this.AgentRunnerType);
-        var agentTypeRootDomain = AgentRunnerTypes.CURRENT_ROOTDOMAIN.Equals(this.AgentRunnerType) || AgentRunnerTypes.ALL_ROOTDOMAINS.Equals(this.AgentRunnerType);
-        var agentTypeSubdomain = AgentRunnerTypes.CURRENT_SUBDOMAIN.Equals(this.AgentRunnerType) || AgentRunnerTypes.ALL_SUBDOMAINS.Equals(this.AgentRunnerType);
-
+        var agentTypeTarget = "Target".Equals(agent.AgentType);
+        var agentTypeRootDomain = "RootDomain".Equals(agent.AgentType);
+        var agentTypeSubdomain = "Subdomain".Equals(agent.AgentType);
 
         return (agentTrigger.SkipIfRunBefore && RanBefore(agent, target, rootDomain, subdomain, agentTypeTarget, agentTypeRootDomain, agentTypeSubdomain)) ||
                (agentTypeTarget && target != null && target.CanSkip(agentTrigger)) ||
