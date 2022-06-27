@@ -1,4 +1,6 @@
-﻿namespace ReconNessAgent.Application;
+﻿using ReconNessAgent.Application.DataAccess;
+
+namespace ReconNessAgent.Application;
 
 /// <summary>
 /// This interface provide the entry point to run the agent command in the terminal and save the result directly into the database using the channel as Id.
@@ -9,8 +11,9 @@ public interface IAgentService
     /// This method receive the agent information serialize on json <see cref="agentInfoJson"/> with the data to run the command in the terminal
     /// and save the output into the database using a channel format.
     /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
     /// <param name="agentRunnerQueueJson">The agent information serialize on json.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A Task.</returns>
-    public Task RunAsync(string agentRunnerQueueJson, CancellationToken cancellationToken = default);
+    public Task RunAsync(IUnitOfWork unitOfWork, string agentRunnerQueueJson, CancellationToken cancellationToken = default);
 }

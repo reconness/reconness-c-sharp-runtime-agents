@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Text.RegularExpressions;
 
 namespace ReconNessAgent.Domain.Core.Entities;
 
@@ -32,6 +33,7 @@ public partial class Subdomain : BaseEntity
     public virtual ICollection<Service> Services { get; set; }
 
     public virtual ICollection<Label> Labels { get; set; }
+
 
     /// <summary>
     /// If we need to skip this Subdomain
@@ -181,5 +183,157 @@ public partial class Subdomain : BaseEntity
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Assign Ip address to the subdomain
+    /// </summary>
+    /// <param name="ipAddress">The IP address</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainIpAddress(string ipAddress)
+    {
+        static bool ValidateIPv4(string ipString)
+        {
+            if (string.IsNullOrWhiteSpace(ipString) || ipString.Count(c => c == '.') != 3)
+            {
+                return false;
+            }
+
+            return IPAddress.TryParse(ipString, out IPAddress? address);
+        }
+
+        if (ValidateIPv4(ipAddress) && this.IpAddress != ipAddress)
+        {
+            this.IpAddress = ipAddress;
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain if is Alive
+    /// </summary>
+    /// <param name="isAlive">If is alive</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainIsAlive(bool isAlive)
+    {
+        if (this.IsAlive != isAlive)
+        {
+            this.IsAlive = isAlive;
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain if it has http port open
+    /// </summary>
+    /// <param name="hasHttpOpen">If has Http port open</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainHasHttpOpen(bool hasHttpOpen)
+    {
+        if (this.HasHttpOpen != hasHttpOpen)
+        {
+            this.HasHttpOpen = hasHttpOpen;
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain if it can be takeover
+    /// </summary>
+    /// <param name="takeover">If has takeover</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainTakeover(bool takeover)
+    {
+        if (this.Takeover != takeover)
+        {
+            this.Takeover = takeover;
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain with directory discovery
+    /// </summary>
+    /// <param name="httpDirectory">The http directory</param>
+    /// <param name="statusCode">the status code</param>
+    /// <param name="method">The method</param>
+    /// <param name="size">The size</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainDirectory(string httpDirectory, string? statusCode, string? method, string? size)
+    {
+        httpDirectory = httpDirectory.TrimEnd('/').TrimEnd();
+        if (this.Directories == null)
+        {
+            this.Directories = new List<Domain.Core.Entities.Directory>();
+        }
+
+        if (this.Directories.Any(d => d.Uri == httpDirectory))
+        {
+            return;
+        }
+
+        var directory = new Domain.Core.Entities.Directory()
+        {
+            Uri = httpDirectory,
+            StatusCode = statusCode,
+            Method = method,
+            Size = size
+        };
+
+        this.Directories.Add(directory);
+    }
+
+    /// <summary>
+    /// Update the subdomain if is a new service with open port
+    /// </summary>
+    /// <param name="service">The service running in that subdomain</param>
+    /// <param name="port">The port</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainService(string service, int? port)
+    {
+        if (this.Services == null)
+        {
+            this.Services = new List<Service>();
+        }
+
+        var newService = new Service
+        {
+            Name = service.ToLower(),
+            Port = port
+        };
+
+        if (!this.Services.Any(s => s.Name == newService.Name && s.Port == newService.Port))
+        {
+            this.Services.Add(newService);
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain Technology
+    /// </summary>
+    /// <param name="technology">The technology running in the subdomain</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainTechnology(string technology)
+    {
+        if (!technology.Equals(this.Technology, StringComparison.OrdinalIgnoreCase))
+        {
+            this.Technology = technology;
+        }
+    }
+
+    /// <summary>
+    /// Update the subdomain label
+    /// </summary>
+    /// <param name="label">The label</param>
+    /// <returns>A task</returns>
+    public void UpdateSubdomainLabel(string label)
+    {
+        if (!this.Labels.Any(l => label.Equals(l.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            var random = new Random();
+            var newLabel = new Label
+            {
+                Name = label,
+                Color = string.Format("#{0:X6}", random.Next(0x1000000))
+            };
+
+            this.Labels.Add(newLabel);
+        }
     }
 }

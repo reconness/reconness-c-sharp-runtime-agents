@@ -28,7 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{C296F263-9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReconNessAgent.Infrastructure.Data.EF", "Infrastructure\Data\ReconNessAgent.Infrastructure.Data.EF\ReconNessAgent.Infrastructure.Data.EF.csproj", "{FF8BEB7B-7926-449F-95F1-511D1CFC4331}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReconNessAgent.Application.UnitTests", "Application\ReconNessAgent.Application.UnitTests\ReconNessAgent.Application.UnitTests.csproj", "{AD1C61AB-C012-4BEE-B6A0-4B4D1FFEF125}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReconNessAgent.Application.UnitTests", "Application\ReconNessAgent.Application.UnitTests\ReconNessAgent.Application.UnitTests.csproj", "{AD1C61AB-C012-4BEE-B6A0-4B4D1FFEF125}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReconNessAgent.Application.Tests", "Application\ReconNessAgent.Application.Tests\ReconNessAgent.Application.Tests.csproj", "{01C03BA4-A242-4E5E-9C77-2525A5AC1CAF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{AD1C61AB-C012-4BEE-B6A0-4B4D1FFEF125}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD1C61AB-C012-4BEE-B6A0-4B4D1FFEF125}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD1C61AB-C012-4BEE-B6A0-4B4D1FFEF125}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01C03BA4-A242-4E5E-9C77-2525A5AC1CAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01C03BA4-A242-4E5E-9C77-2525A5AC1CAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01C03BA4-A242-4E5E-9C77-2525A5AC1CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01C03BA4-A242-4E5E-9C77-2525A5AC1CAF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{C296F263-9412-4C60-99A3-4F4D654CFA1D} = {450DAD9F-B161-49C7-A07A-594D090852CD}
 		{FF8BEB7B-7926-449F-95F1-511D1CFC4331} = {C296F263-9412-4C60-99A3-4F4D654CFA1D}
 		{AD1C61AB-C012-4BEE-B6A0-4B4D1FFEF125} = {114A7F69-FB8F-451F-9AEC-6F849924D062}
+		{01C03BA4-A242-4E5E-9C77-2525A5AC1CAF} = {114A7F69-FB8F-451F-9AEC-6F849924D062}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {31641696-15E4-49C4-9239-23242447B790}

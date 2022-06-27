@@ -18,7 +18,7 @@ public interface IAgentDataAccessService
     /// <param name="channel">The channel for the search.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>The <see cref="AgentRunner"/> entity.</returns>
-    Task<AgentRunner?> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken);
+    Task<AgentRunner?> GetAgentRunnerAsync(IUnitOfWork unitOfWork, string channel, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Change the stage for the <see cref="AgentRunner"/> entity.
@@ -82,9 +82,8 @@ public interface IAgentDataAccessService
     /// </summary>
     /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
     /// <param name="channel"><see cref="Channel"/></param>
-    /// <param name="agentRunner">The <see cref="AgentRunner"/> entity.</param>
     /// <param name="outputParse">The script parsed.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A task.</returns>
-    Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, Channel channel, AgentRunner agentRunner, TerminalOutputParse outputParse, CancellationToken cancellationToken);
+    Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, Channel channel, TerminalOutputParse outputParse, CancellationToken cancellationToken);
 }

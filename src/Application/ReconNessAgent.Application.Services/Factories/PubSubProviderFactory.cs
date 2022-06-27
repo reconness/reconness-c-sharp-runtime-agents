@@ -14,6 +14,7 @@ namespace ReconNessAgent.Application.Services.Factories;
 public class PubSubProviderFactory : IPubSubProviderFactory
 {
     private readonly IAgentService agentService;
+    private readonly IServiceProvider serviceProvider;
     private readonly PubSubOptions pubSubOptions;
 
     /// <summary>
@@ -21,9 +22,10 @@ public class PubSubProviderFactory : IPubSubProviderFactory
     /// </summary>
     /// <param name="agentService"><see cref="IAgentService"/></param>
     /// <param name="options"><see cref="IOptions{PubSubOptions}"/></param>
-    public PubSubProviderFactory(IAgentService agentService, IOptions<PubSubOptions> options)
+    public PubSubProviderFactory(IAgentService agentService, IServiceProvider serviceProvider, IOptions<PubSubOptions> options)
     {
         this.agentService = agentService;
+        this.serviceProvider = serviceProvider;
         pubSubOptions = options.Value;
     }
 
@@ -32,7 +34,7 @@ public class PubSubProviderFactory : IPubSubProviderFactory
     {
         return type switch
         {
-            PubSubType.RABBIT_MQ => new RabbitMQPubSubProvider(agentService, pubSubOptions),
+            PubSubType.RABBIT_MQ => new RabbitMQPubSubProvider(agentService, serviceProvider, pubSubOptions),
             _ => throw new ArgumentException(),
         };
     }

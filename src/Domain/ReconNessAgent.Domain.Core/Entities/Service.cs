@@ -3,7 +3,7 @@
 public partial class Service : BaseEntity
 {
     public Guid Id { get; set; }
-    public int Port { get; set; }
+    public int? Port { get; set; }
     public Guid SubdomainId { get; set; }
     public string? Name { get; set; }
 

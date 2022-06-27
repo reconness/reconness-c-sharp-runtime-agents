@@ -1,6 +1,8 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using ReconNessAgent.Application;
+using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Providers;
 using Serilog;
@@ -18,6 +20,7 @@ public class RabbitMQPubSubProvider : IPubSubProvider
 
     private readonly PubSubOptions options;
     private readonly IAgentService agentService;
+    private readonly IServiceProvider serviceProvider;
 
     private IModel? channel;
 
@@ -27,10 +30,12 @@ public class RabbitMQPubSubProvider : IPubSubProvider
     /// Initializes a new instance of the <see cref="RabbitMQPubSubProvider" /> class.
     /// </summary>
     /// <param name="agentService"><see cref="IAgentService"/></param>
+    /// <param name="serviceProvider"><see cref="IServiceProvider"/></param>
     /// <param name="options">The configuraion options</param>
-    public RabbitMQPubSubProvider(IAgentService agentService, PubSubOptions options)
+    public RabbitMQPubSubProvider(IAgentService agentService, IServiceProvider serviceProvider, PubSubOptions options)
     {
         this.agentService = agentService;
+        this.serviceProvider = serviceProvider;
         this.options = options;
     }
 
@@ -65,8 +70,11 @@ public class RabbitMQPubSubProvider : IPubSubProvider
                 var body = ea.Body.ToArray();
                 if (body != null)
                 {
+                    using var scope = this.serviceProvider.CreateScope();
+                    var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+
                     var agentInfoJson = Encoding.UTF8.GetString(body);
-                    await this.agentService.RunAsync(agentInfoJson, cancellationToken);
+                    await this.agentService.RunAsync(unitOfWork!, agentInfoJson, cancellationToken);
 
                     _logger.Information(agentInfoJson);
                 }
