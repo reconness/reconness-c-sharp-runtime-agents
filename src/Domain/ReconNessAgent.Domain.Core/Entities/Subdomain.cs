@@ -336,4 +336,13 @@ public partial class Subdomain : BaseEntity
             this.Labels.Add(newLabel);
         }
     }
+
+    public void AddNewNote(string agentName, string note)
+    {
+        this.Notes.Add(new Note
+        {
+            CreatedBy = $"Agent {agentName}",
+            Comment = note
+        });
+    }
 }

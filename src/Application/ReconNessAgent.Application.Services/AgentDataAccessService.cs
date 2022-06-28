@@ -85,21 +85,137 @@ public class AgentDataAccessService : IAgentDataAccessService
     public async Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, Channel channel, TerminalOutputParse outputParse, CancellationToken cancellationToken)
     {
         var agent = channel.Value.Agent;
-        var target = channel.Value.Target;
-        var rootDomain = channel.Value.RootDomain;
-        var subdomain = channel.Value.Subdomain;
 
-        if (target != null && await NeedAddNewRootDomain(unitOfWork, target, outputParse.RootDomain, cancellationToken))
-        {
-            rootDomain = await AddNewRootDomainAsync(unitOfWork, target, outputParse.RootDomain!, cancellationToken);
-        }
-       
-        if (rootDomain != null && await NeedAddNewSubdomain(unitOfWork, rootDomain, outputParse.Subdomain, cancellationToken))
-        {
-            subdomain = await AddNewSubdomainAsync(unitOfWork, rootDomain, outputParse.Subdomain!, agent!.Name!, cancellationToken);
-        }
+        var target = await AddOrGetTargetAsync(unitOfWork, channel.Value.Target, agent, outputParse, cancellationToken);
+        var rootDomain = await AddOrGetRootDomainAsync(unitOfWork, target, channel.Value.RootDomain, agent, outputParse, cancellationToken);
+        var subdomain = await AddNewSubdomainAsync(unitOfWork, rootDomain, agent, outputParse, cancellationToken);
 
+        var subdomains = new List<Subdomain>();
         if (subdomain != null)
+        {
+            subdomains.Add(subdomain);
+        }
+
+        if (channel.Value.Subdomain != null)
+        {
+            subdomains.Add(channel.Value.Subdomain);
+        }        
+
+        await UpdateSubdomainsAsync(unitOfWork, subdomains, agent, outputParse, cancellationToken);
+    }
+
+    /// <summary>
+    /// Add or obtain the target
+    /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
+    /// <param name="target">The target</param>
+    /// <param name="agent">The agent</param>
+    /// <param name="outputParse">the output</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>A target</returns>
+    private static async Task<Target?> AddOrGetTargetAsync(IUnitOfWork unitOfWork, Target? target, Agent agent, TerminalOutputParse outputParse, CancellationToken cancellationToken)
+    {
+        if (target == null && await NeedAddNewTargetAsync(unitOfWork, outputParse.Target, cancellationToken))
+        {
+            target = new Target
+            {
+                Name = outputParse.Target,
+                AgentsRanBefore = agent.Name
+            };
+
+            if (!string.IsNullOrEmpty(outputParse.Note))
+            {
+                target.Notes.Add(new Note
+                {
+                    CreatedBy = $"Agent {agent.Name}",
+                    Comment = outputParse.Note
+                });
+            }
+            unitOfWork.Repository<Target>().Add(target);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+
+        return target;
+    }
+
+    /// <summary>
+    /// Add or get the rootdomain
+    /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
+    /// <param name="target">The target</param>
+    /// <param name="rootDomain">The rootdomain</param>
+    /// <param name="agent">The agent</param>
+    /// <param name="outputParse">the output</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>A rootdomain</returns>
+    private static async Task<RootDomain?> AddOrGetRootDomainAsync(IUnitOfWork unitOfWork, Target? target, RootDomain? rootDomain, Agent agent, TerminalOutputParse outputParse, CancellationToken cancellationToken)
+    {
+        if (target != null && rootDomain == null && await NeedAddNewRootDomainAsync(unitOfWork, target, outputParse.RootDomain, cancellationToken))
+        {
+            rootDomain = new RootDomain
+            {
+                Name = outputParse.RootDomain,
+                AgentsRanBefore = agent.Name,
+                Target = target
+            };
+
+            if (!string.IsNullOrEmpty(outputParse.Note))
+            {
+                rootDomain.Notes.Add(new Note
+                {
+                    CreatedBy = $"Agent {agent.Name}",
+                    Comment = outputParse.Note
+                });
+            }
+
+            unitOfWork.Repository<RootDomain>().Add(rootDomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+
+        return rootDomain;
+    }
+
+    /// <summary>
+    /// Add and get the new subdomain if was added
+    /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
+    /// <param name="rootDomain">The rootdomain</param>
+    /// <param name="agent">The agent</param>
+    /// <param name="outputParse">the output</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>A subdomain or null</returns>
+    private static async Task<Subdomain?> AddNewSubdomainAsync(IUnitOfWork unitOfWork, RootDomain? rootDomain, Agent agent, TerminalOutputParse outputParse, CancellationToken cancellationToken)
+    {
+        if (rootDomain != null && await NeedAddNewSubdomainAsync(unitOfWork, rootDomain, outputParse.Subdomain, cancellationToken))
+        {
+            var newSubdomain = new Subdomain
+            {
+                Name = outputParse.RootDomain,
+                AgentsRanBefore = agent.Name,
+                RootDomain = rootDomain
+            };
+
+            unitOfWork.Repository<Subdomain>().Add(newSubdomain);
+            await unitOfWork.CommitAsync(cancellationToken);
+
+            return newSubdomain;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Update different properties of the subdomains
+    /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
+    /// <param name="subdomains">The list if subdomains</param>
+    /// <param name="agent">The agent</param>
+    /// <param name="outputParse">the output</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    private static async Task UpdateSubdomainsAsync(IUnitOfWork unitOfWork, List<Subdomain> subdomains, Agent agent, TerminalOutputParse outputParse,  CancellationToken cancellationToken)
+    {
+        foreach (var subdomain in subdomains)
         {
             var subdomainDirty = false;
 
@@ -155,6 +271,13 @@ public class AgentDataAccessService : IAgentDataAccessService
                 }
             }
 
+            if (!string.IsNullOrEmpty(outputParse.Note))
+            {
+                subdomain.AddNewNote(agent.Name!, outputParse.Note);
+            }
+
+            //TODO: save ExtraFields
+
             if (subdomainDirty)
             {
                 unitOfWork.Repository<Subdomain>().Update(subdomain);
@@ -164,13 +287,32 @@ public class AgentDataAccessService : IAgentDataAccessService
     }
 
     /// <summary>
+    /// If we need to add a new target
+    /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
+    /// <param name="target">The Target</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    /// <returns>If we need to add a new target</returns>
+    private static async ValueTask<bool> NeedAddNewTargetAsync(IUnitOfWork unitOfWork, string? target, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(target))
+        {
+            return false;
+        }
+
+        var existtarget = await unitOfWork.Repository<Target>().AnyAsync(t => t.Name == target, cancellationToken);
+        return !existtarget;
+    }
+
+    /// <summary>
     /// If we need to add a new RootDomain
     /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
     /// <param name="target">The Target</param>
     /// <param name="rootDomain">The root domain</param>
     /// <param name="cancellationToken">Cancellation Token</param>
     /// <returns>If we need to add a new RootDomain</returns>
-    private static async ValueTask<bool> NeedAddNewRootDomain(IUnitOfWork unitOfWork, Target target, string? rootDomain, CancellationToken cancellationToken)
+    private static async ValueTask<bool> NeedAddNewRootDomainAsync(IUnitOfWork unitOfWork, Target target, string? rootDomain, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(rootDomain))
         {
@@ -182,34 +324,14 @@ public class AgentDataAccessService : IAgentDataAccessService
     }
 
     /// <summary>
-    /// Add a new root domain in the target
-    /// </summary>
-    /// <param name="target">The target to add the new root domain</param>
-    /// <param name="rootDomain">The new root domain</param>
-    /// <param name="cancellationToken">Cancellation Token</param>
-    /// <returns>The new root domain added</returns>
-    private static async Task<RootDomain> AddNewRootDomainAsync(IUnitOfWork unitOfWork, Target target, string rootDomain, CancellationToken cancellationToken)
-    {
-        var newRootDomain = new RootDomain
-        {
-            Name = rootDomain,
-            Target = target
-        };
-
-        unitOfWork.Repository<RootDomain>().Add(newRootDomain);
-        await unitOfWork.CommitAsync(cancellationToken);
-
-        return newRootDomain;
-    }
-
-    /// <summary>
     /// If we need to add a new subdomain
     /// </summary>
+    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
     /// <param name="rootDomain">The root domain</param>
     /// <param name="subdomain">The subdomain</param>
     /// <param name="cancellationToken">Cancellation Token</param>
     /// <returns>If we need to add a new RootDomain</returns>
-    private static async ValueTask<bool> NeedAddNewSubdomain(IUnitOfWork unitOfWork, RootDomain rootDomain, string? subdomain, CancellationToken cancellationToken)
+    private static async ValueTask<bool> NeedAddNewSubdomainAsync(IUnitOfWork unitOfWork, RootDomain rootDomain, string? subdomain, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(subdomain) || Uri.CheckHostName(subdomain) == UriHostNameType.Unknown)
         {
@@ -218,27 +340,5 @@ public class AgentDataAccessService : IAgentDataAccessService
 
         var existSubdomain = await unitOfWork.Repository<Subdomain>().AnyAsync(s => s.RootDomain == rootDomain && s.Name == subdomain, cancellationToken);
         return !existSubdomain;
-    }
-
-    /// <summary>
-    /// Add a new subdomain in the target
-    /// </summary>
-    /// <param name="rootDomain">The root domain to add the new subdomain</param>
-    /// <param name="subdomain">The new root domain</param>
-    /// <param name="cancellationToken">Cancellation Token</param>
-    /// <returns>The new subdomain added</returns>
-    private static async Task<Subdomain> AddNewSubdomainAsync(IUnitOfWork unitOfWork, RootDomain rootDomain, string subdomain, string agentName, CancellationToken cancellationToken)
-    {
-        var newSubdomain = new Subdomain
-        {
-            Name = subdomain,
-            AgentsRanBefore = agentName,
-            RootDomain = rootDomain
-        };
-
-        unitOfWork.Repository<Subdomain>().Add(newSubdomain);
-        await unitOfWork.CommitAsync(cancellationToken);
-
-        return newSubdomain;
     }
 }

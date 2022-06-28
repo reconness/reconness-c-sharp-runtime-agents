@@ -2,6 +2,8 @@
 
 public class TerminalOutputParse
 {
+    public string? Target { get; set; }
+
     public string? RootDomain { get; set; }
 
     public string? Subdomain { get; set; }
@@ -25,11 +27,13 @@ public class TerminalOutputParse
     public string? HttpDirectoryStatusCode { get; set; }
 
     public string? HttpDirectorySize { get; set; }
+        
+    public string? Technology { get; set; }
 
     public string? Label { get; set; }
 
     public string? Note { get; set; }
 
-    public string? Technology { get; set; }
+    public string? ExtraFields { get; set; }
 }
 

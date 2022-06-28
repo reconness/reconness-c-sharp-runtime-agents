@@ -25,7 +25,7 @@ public partial class AgentRunner : BaseEntity
     /// </summary>
     /// <param name="agentRunner">The agent runner</param>
     /// <param name="agentRunnerType">The agent runner type</param>
-    public bool CanSkip(Agent? agent, Target? target, RootDomain? rootDomain, Subdomain? subdomain)
+    public bool CanSkip(Agent agent, Target? target, RootDomain? rootDomain, Subdomain? subdomain)
     {
         if (agent == null || agent.AgentTrigger == null)
         {
