@@ -337,6 +337,11 @@ public partial class Subdomain : BaseEntity
         }
     }
 
+    /// <summary>
+    /// Add a new note
+    /// </summary>
+    /// <param name="agentName">The agent name</param>
+    /// <param name="note">The new note</param>
     public void AddNewNote(string agentName, string note)
     {
         this.Notes.Add(new Note

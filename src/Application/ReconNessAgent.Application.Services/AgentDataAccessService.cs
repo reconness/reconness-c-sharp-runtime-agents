@@ -125,12 +125,9 @@ public class AgentDataAccessService : IAgentDataAccessService
 
             if (!string.IsNullOrEmpty(outputParse.Note))
             {
-                target.Notes.Add(new Note
-                {
-                    CreatedBy = $"Agent {agent.Name}",
-                    Comment = outputParse.Note
-                });
+                target.AddNewNote(agent.Name!, outputParse.Note);               
             }
+
             unitOfWork.Repository<Target>().Add(target);
             await unitOfWork.CommitAsync(cancellationToken);
         }
@@ -161,11 +158,7 @@ public class AgentDataAccessService : IAgentDataAccessService
 
             if (!string.IsNullOrEmpty(outputParse.Note))
             {
-                rootDomain.Notes.Add(new Note
-                {
-                    CreatedBy = $"Agent {agent.Name}",
-                    Comment = outputParse.Note
-                });
+                rootDomain.AddNewNote(agent.Name!, outputParse.Note);
             }
 
             unitOfWork.Repository<RootDomain>().Add(rootDomain);
@@ -190,7 +183,7 @@ public class AgentDataAccessService : IAgentDataAccessService
         {
             var newSubdomain = new Subdomain
             {
-                Name = outputParse.RootDomain,
+                Name = outputParse.Subdomain,
                 AgentsRanBefore = agent.Name,
                 RootDomain = rootDomain
             };

@@ -59,4 +59,18 @@ public partial class Target : BaseEntity
 
         return false;
     }
+
+    /// <summary>
+    /// Add a new note
+    /// </summary>
+    /// <param name="agentName">The agent name</param>
+    /// <param name="note">The new note</param>
+    public void AddNewNote(string agentName, string note)
+    {
+        this.Notes.Add(new Note
+        {
+            CreatedBy = $"Agent {agentName}",
+            Comment = note
+        });
+    }
 }

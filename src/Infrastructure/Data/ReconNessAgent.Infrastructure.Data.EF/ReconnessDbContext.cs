@@ -345,7 +345,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
                 entity.HasIndex(e => e.AgentId, "IX_AgentTriggers_AgentId")
                     .IsUnique();
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.SubdomainIncExcIp).HasColumnName("SubdomainIncExcIP");
 
@@ -370,7 +370,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             {
                 entity.HasIndex(e => e.SubdomainId, "IX_Directories_SubdomainId");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.Subdomain)
                     .WithMany(p => p.Directories)
@@ -415,7 +415,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             {
                 entity.ToTable("Label");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasMany(d => d.Subdomains)
                     .WithMany(p => p.Labels)
@@ -443,7 +443,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
 
                 entity.HasIndex(e => e.TargetId, "IX_Note_TargetId");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.RootDomain)
                     .WithMany(p => p.Notes)
@@ -477,7 +477,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             {
                 entity.HasIndex(e => e.TargetId, "IX_RootDomains_TargetId");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.Target)
                     .WithMany(p => p.RootDomains)
@@ -488,7 +488,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             {
                 entity.HasIndex(e => e.SubdomainId, "IX_Services_SubdomainId");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.Subdomain)
                     .WithMany(p => p.Services)
@@ -499,7 +499,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
             {
                 entity.HasIndex(e => e.RootDomainId, "IX_Subdomains_RootDomainId");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.RootDomain)
                     .WithMany(p => p.Subdomains)
@@ -508,7 +508,7 @@ namespace ReconNessAgent.Infrastructure.Data.EF
 
             modelBuilder.Entity<Target>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
             OnModelCreatingPartial(modelBuilder);
