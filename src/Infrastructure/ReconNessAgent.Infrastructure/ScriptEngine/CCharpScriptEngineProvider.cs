@@ -1,8 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Providers;
-using Serilog;
+using ReconNessAgent.Domain.Core;
 using System.Reflection;
 
 namespace ReconNessAgent.Infrastructure.ScriptEngine;
@@ -31,7 +30,7 @@ public class CCharpScriptEngineProvider : IScriptEngineProvider
 
         var globals = new Globals { lineInput = lineInput, lineInputCount = lineInputCount };
         return await CSharpScript.EvaluateAsync<TerminalOutputParse>(script,
-            ScriptOptions.Default.WithImports("ReconNessAgent.Application.Models.ScriptParse")
+            ScriptOptions.Default.WithImports("ReconNessAgent.Domain.Core.TerminalOutputParse")
             .AddReferences(
                 Assembly.GetAssembly(typeof(TerminalOutputParse)),
                 Assembly.GetAssembly(typeof(Exception)),

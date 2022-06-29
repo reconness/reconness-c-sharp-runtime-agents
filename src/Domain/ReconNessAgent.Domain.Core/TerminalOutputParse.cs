@@ -1,4 +1,4 @@
-﻿namespace ReconNessAgent.Application.Models;
+﻿namespace ReconNessAgent.Domain.Core;
 
 public class TerminalOutputParse
 {

@@ -1,5 +1,6 @@
 ﻿using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Models;
+using ReconNessAgent.Domain.Core;
 using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
 using ReconNessAgent.Domain.Core.ValueObjects;
