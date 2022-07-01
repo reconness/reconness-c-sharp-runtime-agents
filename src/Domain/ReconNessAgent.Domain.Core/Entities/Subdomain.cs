@@ -26,6 +26,7 @@ public partial class Subdomain : BaseEntity
     public bool? HasBounty { get; set; }
     public string? AgentsRanBefore { get; set; }
 
+    public string? ExtraFields { get; set; }
     public virtual RootDomain RootDomain { get; set; } = null!;
     public virtual ICollection<Directory> Directories { get; set; }
     public virtual ICollection<EventTrack> EventTracks { get; set; }
@@ -189,7 +190,6 @@ public partial class Subdomain : BaseEntity
     /// Assign Ip address to the subdomain
     /// </summary>
     /// <param name="ipAddress">The IP address</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainIpAddress(string ipAddress)
     {
         static bool ValidateIPv4(string ipString)
@@ -212,7 +212,6 @@ public partial class Subdomain : BaseEntity
     /// Update the subdomain if is Alive
     /// </summary>
     /// <param name="isAlive">If is alive</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainIsAlive(bool isAlive)
     {
         if (this.IsAlive != isAlive)
@@ -225,7 +224,6 @@ public partial class Subdomain : BaseEntity
     /// Update the subdomain if it has http port open
     /// </summary>
     /// <param name="hasHttpOpen">If has Http port open</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainHasHttpOpen(bool hasHttpOpen)
     {
         if (this.HasHttpOpen != hasHttpOpen)
@@ -238,7 +236,6 @@ public partial class Subdomain : BaseEntity
     /// Update the subdomain if it can be takeover
     /// </summary>
     /// <param name="takeover">If has takeover</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainTakeover(bool takeover)
     {
         if (this.Takeover != takeover)
@@ -254,7 +251,6 @@ public partial class Subdomain : BaseEntity
     /// <param name="statusCode">the status code</param>
     /// <param name="method">The method</param>
     /// <param name="size">The size</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainDirectory(string httpDirectory, string? statusCode, string? method, string? size)
     {
         httpDirectory = httpDirectory.TrimEnd('/').TrimEnd();
@@ -284,7 +280,6 @@ public partial class Subdomain : BaseEntity
     /// </summary>
     /// <param name="service">The service running in that subdomain</param>
     /// <param name="port">The port</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainService(string service, int? port)
     {
         if (this.Services == null)
@@ -308,7 +303,6 @@ public partial class Subdomain : BaseEntity
     /// Update the subdomain Technology
     /// </summary>
     /// <param name="technology">The technology running in the subdomain</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainTechnology(string technology)
     {
         if (!technology.Equals(this.Technology, StringComparison.OrdinalIgnoreCase))
@@ -318,10 +312,18 @@ public partial class Subdomain : BaseEntity
     }
 
     /// <summary>
+    /// Update the subdomain ExtraFields
+    /// </summary>
+    /// <param name="extraFields">The ExtraFields</param>
+    public void UpdateSubdomainExtraFields(string extraFields)
+    {
+        this.ExtraFields += extraFields;
+    }
+
+    /// <summary>
     /// Update the subdomain label
     /// </summary>
     /// <param name="label">The label</param>
-    /// <returns>A task</returns>
     public void UpdateSubdomainLabel(string label)
     {
         if (!this.Labels.Any(l => label.Equals(l.Name, StringComparison.OrdinalIgnoreCase)))

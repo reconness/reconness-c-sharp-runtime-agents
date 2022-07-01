@@ -15,6 +15,7 @@ public partial class AgentRunnerCommand : BaseEntity
     public int Number { get; set; }
     public int Server { get; set; }
     public Guid AgentRunnerId { get; set; }
+    public string? Error { get; set; }
 
     public virtual AgentRunner AgentRunner { get; set; } = null!;
     public virtual ICollection<AgentRunnerCommandOutput> AgentRunnerCommandOutputs { get; set; }

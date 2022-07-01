@@ -162,8 +162,9 @@ public class AgentService : IAgentService
 
             agentRunnerCommandStatus = await RunTerminalAsync(unitOfWork, channel, agentRunnerQueue, agentRunner, agentRunnerCommand, terminalProvider, scriptEngineProvider, cancellationToken);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            agentRunnerCommand.Error = ex.Message;
             agentRunnerCommandStatus = AgentRunnerCommandStatus.FAILED;
         }
 
@@ -208,10 +209,10 @@ public class AgentService : IAgentService
             var output = await terminal.ReadLineAsync();
             if (!string.IsNullOrEmpty(output))
             {
-                var outputParse = await scriptEngineProvider.ParseAsync(output, count++, cancellationToken);
-
                 // save terminalLineOutput on AgentRunnerOutput
                 await this.agentDataAccessService.SaveAgentRunnerCommandOutputAsync(unitOfWork, agentRunnerCommand, output, cancellationToken);
+
+                var outputParse = await scriptEngineProvider.ParseAsync(output, count++, cancellationToken);
 
                 // save what we parse from the terminal output
                 await this.agentDataAccessService.SaveScriptOutputParseAsync(unitOfWork, channel, outputParse, cancellationToken);

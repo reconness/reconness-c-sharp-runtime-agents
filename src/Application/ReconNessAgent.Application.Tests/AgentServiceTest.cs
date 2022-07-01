@@ -295,6 +295,267 @@ namespace ReconNessAgent.Application.Tests
             agentRunnerCommandOutputSaved!.Output.Should().Be("PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data.");
         }
 
+
+        /// <summary>
+        /// Test save empty data into a subdomain
+        /// 
+        /// {
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
+        ///     "Payload": "www.myrootdomain.com",
+        ///     "Command": "ping www.myrootdomain.com"
+        /// }
+        /// 
+        /// Note: We emulate the terminal process returning all the time: "PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data."
+        /// 
+        /// </summary>
+        [Fact]
+        public async Task Run_Save_Subdomain_Info_Empty_Async()
+        {
+            // arrange
+            var script = @"using ReconNessAgent.Domain.Core;
+                    
+                            return new TerminalOutputParse();
+                            ";
+
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}");
+            var target = await CreateTestTargetAsync();
+            var rootDomain = await CreateTestRootDomainAsync(target);
+            var subdomain = await CreateTestSubDomainAsync(rootDomain);
+
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_all";
+            var agentRunner = await CreateAgentRunner(agent, channel);
+
+            const string queueData = @"
+            {
+              ""Channel"": ""{{channel}}"",
+              ""Payload"": ""{{subdomain}}"",
+              ""Command"": ""{{command}}"",
+              ""Count"": 5,
+              ""AvailableServerNumber"": 1
+            }";
+
+            bool finished = true;
+            A.CallTo(() => terminalProviderFake.Finished).ReturnsLazily(() =>
+            {
+                finished = !finished;
+                return finished;
+            });
+
+            A.CallTo(() => terminalProviderFake.ReadLineAsync()).Returns("PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data.");
+
+            var payload = queueData
+                .Replace("{{channel}}", channel)
+                .Replace("{{command}}", agent.Command)
+                .Replace("{{subdomain}}", subdomain.Name);
+
+            // act
+            await agentService.RunAsync(unitOfWork, payload);
+
+            var subdomainSaved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
+            var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
+            var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
+            var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+
+            // cleanup
+            unitOfWork.Repository<Agent>().Delete(agent);
+            unitOfWork.Repository<Target>().Delete(target); // this delete the rootdomain and subdomain on cascade
+            unitOfWork.Repository<AgentRunner>().Delete(agentRunner); // this delete the agentRunnerCommand on cascade
+            await unitOfWork.CommitAsync();
+
+            // assert
+            subdomainSaved.Should().NotBeNull();
+            subdomainSaved!.IpAddress.Should().BeNullOrEmpty();
+
+            subdomain1Saved.Should().BeNull();
+
+            agentRunnerSaved.Should().NotBeNull();
+            agentRunnerSaved!.Stage.Should().Be(Domain.Core.Enums.AgentRunnerStage.RUNNING);
+
+            agentRunnerCommandSaved.Should().NotBeNull();
+            agentRunnerCommandSaved!.Status.Should().Be(Domain.Core.Enums.AgentRunnerCommandStatus.SUCCESS);
+            agentRunnerCommandSaved!.Command.Should().Be("ping www.myrootdomain.com");
+            agentRunnerCommandSaved!.Server.Should().Be(1);
+            agentRunnerCommandSaved!.Number.Should().Be(5);
+
+            agentRunnerCommandOutputSaved.Should().NotBeNull();
+            agentRunnerCommandOutputSaved!.Output.Should().Be("PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data.");
+        }
+
+        /// <summary>
+        /// Test save data into a subdomain, but with bad script
+        /// 
+        /// {
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
+        ///     "Payload": "www.myrootdomain.com",
+        ///     "Command": "ping www.myrootdomain.com"
+        /// }
+        /// 
+        /// Note: We emulate the terminal process returning all the time: "PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data."
+        /// 
+        /// </summary>
+        [Fact]
+        public async Task Run_Save_Subdomain_Info_Bad_Script_Async()
+        {
+            // arrange
+            var script = @"using ReconNessAgent.Domain.Core;
+
+                            ...bad script....
+
+                            return new TerminalOutputParse();
+                            ";
+
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}");
+            var target = await CreateTestTargetAsync();
+            var rootDomain = await CreateTestRootDomainAsync(target);
+            var subdomain = await CreateTestSubDomainAsync(rootDomain);
+
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_all";
+            var agentRunner = await CreateAgentRunner(agent, channel);
+
+            const string queueData = @"
+            {
+              ""Channel"": ""{{channel}}"",
+              ""Payload"": ""{{subdomain}}"",
+              ""Command"": ""{{command}}"",
+              ""Count"": 5,
+              ""AvailableServerNumber"": 1
+            }";
+
+            bool finished = true;
+            A.CallTo(() => terminalProviderFake.Finished).ReturnsLazily(() =>
+            {
+                finished = !finished;
+                return finished;
+            });
+
+            A.CallTo(() => terminalProviderFake.ReadLineAsync()).Returns("PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data.");
+
+            var payload = queueData
+                .Replace("{{channel}}", channel)
+                .Replace("{{command}}", agent.Command)
+                .Replace("{{subdomain}}", subdomain.Name);
+
+            // act
+            await agentService.RunAsync(unitOfWork, payload);
+
+            var subdomainSaved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
+            var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
+            var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
+            var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+
+            // cleanup
+            unitOfWork.Repository<Agent>().Delete(agent);
+            unitOfWork.Repository<Target>().Delete(target); // this delete the rootdomain and subdomain on cascade
+            unitOfWork.Repository<AgentRunner>().Delete(agentRunner); // this delete the agentRunnerCommand on cascade
+            await unitOfWork.CommitAsync();
+
+            // assert
+            subdomainSaved.Should().NotBeNull();
+            subdomainSaved!.IpAddress.Should().BeNullOrEmpty();
+
+            subdomain1Saved.Should().BeNull();
+
+            agentRunnerSaved.Should().NotBeNull();
+            agentRunnerSaved!.Stage.Should().Be(Domain.Core.Enums.AgentRunnerStage.RUNNING);
+
+            agentRunnerCommandSaved.Should().NotBeNull();
+            agentRunnerCommandSaved!.Error.Should().Be("(3,29): error CS8635: Unexpected character sequence '...'");
+            agentRunnerCommandSaved!.Status.Should().Be(Domain.Core.Enums.AgentRunnerCommandStatus.FAILED);
+            agentRunnerCommandSaved!.Command.Should().Be("ping www.myrootdomain.com");
+            agentRunnerCommandSaved!.Server.Should().Be(1);
+            agentRunnerCommandSaved!.Number.Should().Be(5);
+
+            agentRunnerCommandOutputSaved.Should().NotBeNull();
+            agentRunnerCommandOutputSaved!.Output.Should().Be("PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data.");
+        }
+
+        /// <summary>
+        /// Test save empty data into a subdomain but if the terminal return empty, we are not running nothing
+        /// 
+        /// {
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
+        ///     "Payload": "www.myrootdomain.com",
+        ///     "Command": "ping www.myrootdomain.com"
+        /// }
+        /// 
+        /// Note: We emulate the terminal process returning all the time: ""
+        /// 
+        /// </summary>
+        [Fact]
+        public async Task Run_Save_Subdomain_Info_Empty_TerminalReadLine_Async()
+        {
+            // arrange
+            var script = @"using ReconNessAgent.Domain.Core;
+                    
+                            return new TerminalOutputParse();
+                            ";
+
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}");
+            var target = await CreateTestTargetAsync();
+            var rootDomain = await CreateTestRootDomainAsync(target);
+            var subdomain = await CreateTestSubDomainAsync(rootDomain);
+
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_all";
+            var agentRunner = await CreateAgentRunner(agent, channel);
+
+            const string queueData = @"
+            {
+              ""Channel"": ""{{channel}}"",
+              ""Payload"": ""{{subdomain}}"",
+              ""Command"": ""{{command}}"",
+              ""Count"": 5,
+              ""AvailableServerNumber"": 1
+            }";
+
+            bool finished = true;
+            A.CallTo(() => terminalProviderFake.Finished).ReturnsLazily(() =>
+            {
+                finished = !finished;
+                return finished;
+            });
+
+            A.CallTo(() => terminalProviderFake.ReadLineAsync()).Returns("");
+
+            var payload = queueData
+                .Replace("{{channel}}", channel)
+                .Replace("{{command}}", agent.Command)
+                .Replace("{{subdomain}}", subdomain.Name);
+
+            // act
+            await agentService.RunAsync(unitOfWork, payload);
+
+            var subdomainSaved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
+            var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
+            var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
+            var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+
+            // cleanup
+            unitOfWork.Repository<Agent>().Delete(agent);
+            unitOfWork.Repository<Target>().Delete(target); // this delete the rootdomain and subdomain on cascade
+            unitOfWork.Repository<AgentRunner>().Delete(agentRunner); // this delete the agentRunnerCommand on cascade
+            await unitOfWork.CommitAsync();
+
+            // assert
+            subdomainSaved.Should().NotBeNull();
+            subdomainSaved!.IpAddress.Should().BeNullOrEmpty();
+
+            subdomain1Saved.Should().BeNull();
+
+            agentRunnerSaved.Should().NotBeNull();
+            agentRunnerSaved!.Stage.Should().Be(Domain.Core.Enums.AgentRunnerStage.RUNNING);
+
+            agentRunnerCommandSaved.Should().NotBeNull();
+            agentRunnerCommandSaved!.Status.Should().Be(Domain.Core.Enums.AgentRunnerCommandStatus.SUCCESS);
+            agentRunnerCommandSaved!.Command.Should().Be("ping www.myrootdomain.com");
+            agentRunnerCommandSaved!.Server.Should().Be(1);
+            agentRunnerCommandSaved!.Number.Should().Be(5);
+
+            agentRunnerCommandOutputSaved.Should().BeNull();
+        }
+
         /// <summary>
         /// Create a mock test agent
         /// </summary>

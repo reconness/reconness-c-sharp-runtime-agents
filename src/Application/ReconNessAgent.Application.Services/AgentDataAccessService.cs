@@ -270,7 +270,11 @@ public class AgentDataAccessService : IAgentDataAccessService
                 subdomain.AddNewNote(agent.Name!, outputParse.Note);
             }
 
-            //TODO: save ExtraFields
+            if (!string.IsNullOrEmpty(outputParse.ExtraFields))
+            {
+                subdomain.UpdateSubdomainExtraFields(outputParse.ExtraFields);
+                subdomainDirty = true;
+            }
 
             if (subdomainDirty)
             {
