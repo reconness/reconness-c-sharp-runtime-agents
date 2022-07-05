@@ -4,20 +4,20 @@ using System.Linq.Expressions;
 namespace ReconNessAgent.Infrastructure.Data.EF;
 
 /// <summary>
-/// This class implement <see cref="IRepository<TEntity>"/>
+/// This class implement <see cref="IRepository<TEntity>"/>.
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 {
     /// <summary>
-    /// The DataBase Context
+    /// The DataBase Context.
     /// </summary>
     private readonly IDbContext context;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Repository{TEntity}" /> class
+    /// Initializes a new instance of the <see cref="Repository{TEntity}" /> class.
     /// </summary>
-    /// <param name="context">The implementation of Database Context <see cref="IDbContext" /></param>
+    /// <param name="context">The implementation of Database Context <see cref="IDbContext"/>.</param>
     public Repository(IDbContext context)
     {
         this.context = context;

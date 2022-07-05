@@ -3,7 +3,7 @@
 namespace ReconNessAgent.Application.DataAccess;
 
 /// <summary>
-/// The interface IRepository<TEntity>
+/// The interface IRepository<TEntity> patter
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
 public interface IRepository<TEntity> where TEntity : class

@@ -88,7 +88,7 @@ public partial class Subdomain : BaseEntity
                 foreach (var service in this.Services)
                 {
                     var matchService = Regex.Match(service.Name!, agentTrigger.SubdomainServicePort);
-                    var matchPort = Regex.Match(service.Port.ToString(), agentTrigger.SubdomainServicePort);
+                    var matchPort = Regex.Match(service.Port.ToString() ?? String.Empty, agentTrigger.SubdomainServicePort);
 
                     // if match success service or port dont skip this subdomain  
                     if (matchService.Success || matchPort.Success)
@@ -104,7 +104,7 @@ public partial class Subdomain : BaseEntity
                 foreach (var service in this.Services)
                 {
                     var matchService = Regex.Match(service.Name!, agentTrigger.SubdomainServicePort);
-                    var matchPort = Regex.Match(service.Port.ToString(), agentTrigger.SubdomainServicePort);
+                    var matchPort = Regex.Match(service.Port.ToString() ?? String.Empty, agentTrigger.SubdomainServicePort);
 
                     // if match success services or port skip this subdomain  
                     if (matchService.Success || matchPort.Success)

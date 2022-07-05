@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using ReconNessAgent.Application.Providers;
-using ReconNessAgent.Domain.Core;
+using ReconNessAgent.Domain.Core.ValueObjects;
 using System.Reflection;
 
 namespace ReconNessAgent.Infrastructure.ScriptEngine;
@@ -28,23 +28,13 @@ public class CCharpScriptEngineProvider : IScriptEngineProvider
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var globals = new Globals { lineInput = lineInput, lineInputCount = lineInputCount };
+        var globals = new ScriptEngineArgs { lineInput = lineInput, lineInputCount = lineInputCount };
         return await CSharpScript.EvaluateAsync<TerminalOutputParse>(script,
-            ScriptOptions.Default.WithImports("ReconNessAgent.Domain.Core.TerminalOutputParse")
+            ScriptOptions.Default.WithImports("ReconNessAgent.Domain.Core.ValueObjects.TerminalOutputParse")
             .AddReferences(
                 Assembly.GetAssembly(typeof(TerminalOutputParse)),
                 Assembly.GetAssembly(typeof(Exception)),
                 Assembly.GetAssembly(typeof(System.Text.RegularExpressions.Regex)))
             , globals: globals, cancellationToken: cancellationToken);
     }
-}
-
-/// <summary>
-/// Global Class
-/// </summary>
-public class Globals
-{
-    public string? lineInput;
-
-    public int lineInputCount;
 }

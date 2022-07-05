@@ -4,7 +4,7 @@ using ReconNessAgent.Application.Providers;
 namespace ReconNessAgent.Application.Factories;
 
 /// <summary>
-/// This interface expose a methof to build the script engine <see cref="IScriptEngineProvider"/> based in the language that is going to parse the terminal output,
+/// This interface expose a method to build the script engine <see cref="IScriptEngineProvider"/> based in the language that is going to parse the terminal output,
 /// by default we use <see cref="ScriptEngineLanguage.C_CHARP"/>.
 /// </summary>
 public interface IScriptEngineProvideFactory

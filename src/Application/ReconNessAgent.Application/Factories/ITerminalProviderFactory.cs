@@ -4,7 +4,7 @@ using ReconNessAgent.Application.Providers;
 namespace ReconNessAgent.Application.Factories;
 
 /// <summary>
-/// This interface expose a methof to build the <see cref="ITerminalProvider"/> to run the command based in the type 
+/// This interface expose a method to build the <see cref="ITerminalProvider"/> to run the command based in the type 
 /// <see cref="TerminalType" />, by default we used <see cref="TerminalType.BASH" />.
 /// </summary>
 public interface ITerminalProviderFactory

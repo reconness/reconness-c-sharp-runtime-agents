@@ -53,7 +53,7 @@ public class RabbitMQPubSubProvider : IPubSubProvider
     }
 
     /// <summary>
-    /// Subscribe to the RabbitMQ consumer event 
+    /// Subscribe to the RabbitMQ consumer event.
     /// </summary>
     private void SubscribeConsumerEvent(CancellationToken cancellationToken)
     {
@@ -87,7 +87,7 @@ public class RabbitMQPubSubProvider : IPubSubProvider
     }
 
     /// <summary>
-    /// Try to initialize the channel .
+    /// Try to initialize the channel.
     /// </summary>
     private void InitializeChannel()
     {
@@ -125,7 +125,7 @@ public class RabbitMQPubSubProvider : IPubSubProvider
         }
         catch (Exception ex)
         {
-            _logger.Error(ex.Message);
+            _logger.Error(ex, ex.Message);
             this.channel = null;
         }
     }

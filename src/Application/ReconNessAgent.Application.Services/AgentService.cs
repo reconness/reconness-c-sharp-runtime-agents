@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using ReconNessAgent.Application.DataAccess;
+﻿using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Factories;
 using ReconNessAgent.Application.Models;
 using ReconNessAgent.Application.Providers;
@@ -79,8 +78,9 @@ public class AgentService : IAgentService
 
                 await unitOfWork.CommitAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.Error(ex, ex.Message);
                 unitOfWork.Rollback();
             }
         }
@@ -135,14 +135,14 @@ public class AgentService : IAgentService
     }
 
     /// <summary>
-    /// 
+    /// This method initialize the terminal provider, the script enginer provider and obtain the script agent from the database to parse the terminal output.
     /// </summary>
-    /// <param name="unitOfWork"></param>
-    /// <param name="agentRunnerQueue"></param>
-    /// <param name="agentRunner"></param>
-    /// <param name="agentRunnerCommand"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="unitOfWork">The <see cref="IUnitOfWork"/>.</param>
+    /// <param name="agentRunnerQueue">The <see cref="AgentRunnerQueue"/>.</param>
+    /// <param name="agentRunner">The <see cref="AgentRunner"/>.</param>
+    /// <param name="agentRunnerCommand">The <see cref="AgentRunnerCommand"/>.</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled.</param>
+    /// <returns>A task.</returns>
     private async Task RunInternalAsync(IUnitOfWork unitOfWork, Channel channel, AgentRunnerQueue agentRunnerQueue, AgentRunner agentRunner, AgentRunnerCommand agentRunnerCommand, CancellationToken cancellationToken)
     {
         var terminalProvider = this.terminalProviderFactory.CreateTerminalProvider();
@@ -174,16 +174,16 @@ public class AgentService : IAgentService
     }
 
     /// <summary>
-    /// 
+    /// This method run the command in the terminal and save the output in the database after the parse using the script enginer provider.
     /// </summary>
-    /// <param name="unitOfWork"></param>
-    /// <param name="agentRunnerQueue"></param>
-    /// <param name="agentRunner"></param>
-    /// <param name="agentRunnerCommand"></param>
-    /// <param name="terminal"></param>
-    /// <param name="scriptEngineProvider"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="unitOfWork">The <see cref="IUnitOfWork"/>.</param>
+    /// <param name="agentRunnerQueue">The <see cref="AgentRunnerQueue"/>.</param>
+    /// <param name="agentRunner">The <see cref="AgentRunner"/>.</param>
+    /// <param name="agentRunnerCommand">The <see cref="AgentRunnerCommand"/>.</param>
+    /// <param name="terminal">The <see cref="ITerminalProvider"/> provider.</param>
+    /// <param name="scriptEngineProvider">The <see cref="IScriptEngineProvider"/> provider.</param>
+    /// <param name="cancellationToken">Notification that operations should be canceled.</param>
+    /// <returns>The status for the command [STOPPED or SUCCESS]</returns>
     private async Task<AgentRunnerCommandStatus> RunTerminalAsync(IUnitOfWork unitOfWork,
                                                                   Channel channel,
                                                                   AgentRunnerQueue agentRunnerQueue,

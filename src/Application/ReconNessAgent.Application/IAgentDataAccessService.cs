@@ -1,6 +1,5 @@
 ﻿using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Models;
-using ReconNessAgent.Domain.Core;
 using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
 using ReconNessAgent.Domain.Core.ValueObjects;
@@ -70,9 +69,9 @@ public interface IAgentDataAccessService
     Task ChangeAgentRunnerCommandStatusAsync(IUnitOfWork unitOfWork, AgentRunnerCommand agentRunnerCommand, AgentRunnerCommandStatus status, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Verify if we can skip the current command, because we ran the same command before.
+    /// Verify if we can skip the current command, because we ran the same command before or is not part of the target.
     /// </summary>
-    /// <param name="channel"><see cref="Channel"/></param>
+    /// <param name="channel">The <see cref="Channel"/></param>
     /// <param name="agentRunnerCommand">The <see cref="AgentRunnerCommand"/> entity</param>
     /// <returns>If we can skip the current command</returns>
     bool CanSkipAgentRunnerCommand(Channel channel, AgentRunnerCommand agentRunnerCommand);
@@ -80,8 +79,8 @@ public interface IAgentDataAccessService
     /// <summary>
     /// Save what we found parsing the terminal output using the agent script.
     /// </summary>
-    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
-    /// <param name="channel"><see cref="Channel"/></param>
+    /// <param name="unitOfWork">The <see cref="IUnitOfWork"/></param>
+    /// <param name="channel">The <see cref="Channel"/></param>
     /// <param name="outputParse">The script parsed.</param>
     /// <param name="cancellationToken">Notification that operations should be canceled.</param>
     /// <returns>A task.</returns>

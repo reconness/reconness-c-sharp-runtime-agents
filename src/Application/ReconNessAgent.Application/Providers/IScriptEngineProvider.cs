@@ -1,5 +1,5 @@
 ﻿using ReconNessAgent.Application.Models;
-using ReconNessAgent.Domain.Core;
+using ReconNessAgent.Domain.Core.ValueObjects;
 
 namespace ReconNessAgent.Application.Providers;
 

@@ -60,7 +60,7 @@ namespace ReconNessAgent.Application.Tests
         public async Task Run_Save_NewRootdomain_OK_Async()
         {
             // arrange
-            var script = @"using ReconNessAgent.Domain.Core;
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
                     
                            return new TerminalOutputParse { RootDomain = lineInput }; ";
 
@@ -74,8 +74,8 @@ namespace ReconNessAgent.Application.Tests
             {
               ""Channel"": ""{{channel}}"",
               ""Command"": ""{{command}}"",
-              ""Count"": 5,
-              ""AvailableServerNumber"": 1
+              ""Number"": 5,
+              ""ServerNumber"": 1
             }";
 
             bool finished = true;
@@ -98,7 +98,7 @@ namespace ReconNessAgent.Application.Tests
             var rootdomainSaved = await unitOfWork.Repository<RootDomain>().GetByCriteriaAsync(a => a.Name == "myrootdomain.com");
             var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
             var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
-            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
 
             // cleanup
             unitOfWork.Repository<Agent>().Delete(agent);
@@ -138,7 +138,7 @@ namespace ReconNessAgent.Application.Tests
         public async Task Run_Save_NewSubdomain_OK_Async()
         {
             // arrange
-            var script = @"using ReconNessAgent.Domain.Core;
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
                     
                            return new TerminalOutputParse { Subdomain = lineInput }; ";
 
@@ -154,8 +154,8 @@ namespace ReconNessAgent.Application.Tests
               ""Channel"": ""{{channel}}"",
               ""Payload"": ""{{rootdomain}}"",
               ""Command"": ""{{command}}"",
-              ""Count"": 5,
-              ""AvailableServerNumber"": 1
+              ""Number"": 5,
+              ""ServerNumber"": 1
             }";
 
             bool finished = true;
@@ -178,7 +178,7 @@ namespace ReconNessAgent.Application.Tests
             var subdomain = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
             var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
             var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
-            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
 
             // cleanup
             unitOfWork.Repository<Agent>().Delete(agent);
@@ -218,7 +218,7 @@ namespace ReconNessAgent.Application.Tests
         public async Task Run_Save_Subdomain_Info_OK_Async()
         {
             // arrange
-            var script = @"using ReconNessAgent.Domain.Core;
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
                     
                             var match = System.Text.RegularExpressions.Regex.Match(lineInput, @""PING\s(.*?)\s\((.*?)\)"");
                             if (match.Success && match.Groups.Count == 3)
@@ -242,8 +242,8 @@ namespace ReconNessAgent.Application.Tests
               ""Channel"": ""{{channel}}"",
               ""Payload"": ""{{subdomain}}"",
               ""Command"": ""{{command}}"",
-              ""Count"": 5,
-              ""AvailableServerNumber"": 1
+              ""Number"": 5,
+              ""ServerNumber"": 1
             }";
 
             bool finished = true;
@@ -267,7 +267,7 @@ namespace ReconNessAgent.Application.Tests
             var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
             var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
             var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
-            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
 
             // cleanup
             unitOfWork.Repository<Agent>().Delete(agent);
@@ -312,7 +312,7 @@ namespace ReconNessAgent.Application.Tests
         public async Task Run_Save_Subdomain_Info_Empty_Async()
         {
             // arrange
-            var script = @"using ReconNessAgent.Domain.Core;
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
                     
                             return new TerminalOutputParse();
                             ";
@@ -330,8 +330,8 @@ namespace ReconNessAgent.Application.Tests
               ""Channel"": ""{{channel}}"",
               ""Payload"": ""{{subdomain}}"",
               ""Command"": ""{{command}}"",
-              ""Count"": 5,
-              ""AvailableServerNumber"": 1
+              ""Number"": 5,
+              ""ServerNumber"": 1
             }";
 
             bool finished = true;
@@ -355,7 +355,7 @@ namespace ReconNessAgent.Application.Tests
             var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
             var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
             var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
-            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
 
             // cleanup
             unitOfWork.Repository<Agent>().Delete(agent);
@@ -398,7 +398,7 @@ namespace ReconNessAgent.Application.Tests
         public async Task Run_Save_Subdomain_Info_Bad_Script_Async()
         {
             // arrange
-            var script = @"using ReconNessAgent.Domain.Core;
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
 
                             ...bad script....
 
@@ -418,8 +418,8 @@ namespace ReconNessAgent.Application.Tests
               ""Channel"": ""{{channel}}"",
               ""Payload"": ""{{subdomain}}"",
               ""Command"": ""{{command}}"",
-              ""Count"": 5,
-              ""AvailableServerNumber"": 1
+              ""Number"": 5,
+              ""ServerNumber"": 1
             }";
 
             bool finished = true;
@@ -443,7 +443,7 @@ namespace ReconNessAgent.Application.Tests
             var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
             var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
             var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
-            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
 
             // cleanup
             unitOfWork.Repository<Agent>().Delete(agent);
@@ -487,7 +487,7 @@ namespace ReconNessAgent.Application.Tests
         public async Task Run_Save_Subdomain_Info_Empty_TerminalReadLine_Async()
         {
             // arrange
-            var script = @"using ReconNessAgent.Domain.Core;
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
                     
                             return new TerminalOutputParse();
                             ";
@@ -505,8 +505,8 @@ namespace ReconNessAgent.Application.Tests
               ""Channel"": ""{{channel}}"",
               ""Payload"": ""{{subdomain}}"",
               ""Command"": ""{{command}}"",
-              ""Count"": 5,
-              ""AvailableServerNumber"": 1
+              ""Number"": 5,
+              ""ServerNumber"": 1
             }";
 
             bool finished = true;
@@ -530,7 +530,7 @@ namespace ReconNessAgent.Application.Tests
             var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
             var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
             var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
-            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
 
             // cleanup
             unitOfWork.Repository<Agent>().Delete(agent);
@@ -555,6 +555,8 @@ namespace ReconNessAgent.Application.Tests
 
             agentRunnerCommandOutputSaved.Should().BeNull();
         }
+
+        // TODO: Test the skip part
 
         /// <summary>
         /// Create a mock test agent

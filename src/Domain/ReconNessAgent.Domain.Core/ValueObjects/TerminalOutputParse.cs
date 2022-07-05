@@ -1,4 +1,4 @@
-﻿namespace ReconNessAgent.Domain.Core;
+﻿namespace ReconNessAgent.Domain.Core.ValueObjects;
 
 public class TerminalOutputParse
 {
@@ -27,7 +27,7 @@ public class TerminalOutputParse
     public string? HttpDirectoryStatusCode { get; set; }
 
     public string? HttpDirectorySize { get; set; }
-        
+
     public string? Technology { get; set; }
 
     public string? Label { get; set; }

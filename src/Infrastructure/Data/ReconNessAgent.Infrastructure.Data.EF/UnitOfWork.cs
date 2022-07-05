@@ -3,6 +3,9 @@ using System.Collections;
 
 namespace ReconNessAgent.Infrastructure.Data.EF;
 
+/// <summary>
+/// This class implement <see cref="IUnitOfWork"/>
+/// </summary>
 public class UnitOfWork : IUnitOfWork
 {
     /// <summary>
@@ -11,14 +14,14 @@ public class UnitOfWork : IUnitOfWork
     private readonly IDbContext context;
 
     /// <summary>
-    /// A hash of repositories
+    /// A hash of repositories.
     /// </summary>
-    private Hashtable repositories;
+    private readonly Hashtable repositories;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UnitOfWork" /> class
+    /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
     /// </summary>
-    /// <param name="context">The implementation of Database Context <see cref="IDbContext" /></param>
+    /// <param name="context">The implementation of Database Context <see cref="IDbContext"/>.</param>
     public UnitOfWork(IDbContext context)
     {
         this.context = context;

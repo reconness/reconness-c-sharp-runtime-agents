@@ -1,6 +1,5 @@
 ﻿using ReconNessAgent.Application.DataAccess;
 using ReconNessAgent.Application.Models;
-using ReconNessAgent.Domain.Core;
 using ReconNessAgent.Domain.Core.Entities;
 using ReconNessAgent.Domain.Core.Enums;
 using ReconNessAgent.Domain.Core.ValueObjects;
@@ -36,8 +35,8 @@ public class AgentDataAccessService : IAgentDataAccessService
             AgentRunner = agentRunner,
             Command = agentRunnerQueue.Command,
             Status = AgentRunnerCommandStatus.RUNNING,
-            Number = agentRunnerQueue.Count,
-            Server = agentRunnerQueue.AvailableServerNumber
+            Number = agentRunnerQueue.Number,
+            Server = agentRunnerQueue.ServerNumber
         };
 
         unitOfWork.Repository<AgentRunnerCommand>().Add(agentRunnerCommand);
@@ -257,7 +256,7 @@ public class AgentDataAccessService : IAgentDataAccessService
 
             if (!string.IsNullOrWhiteSpace(outputParse.Label))
             {
-                var label = await unitOfWork.Repository<Label>().GetByCriteriaAsync(l => l.Name.ToLower() == outputParse.Label.ToLower(), cancellationToken);
+                var label = await unitOfWork.Repository<Label>().GetByCriteriaAsync(l => l.Name!.ToLower() == outputParse.Label.ToLower(), cancellationToken);
                 if (label == null)
                 {
                     subdomain.UpdateSubdomainLabel(outputParse.Label);
