@@ -85,8 +85,8 @@ public class AgentDataAccessService : IAgentDataAccessService
     public async Task SaveScriptOutputParseAsync(IUnitOfWork unitOfWork, Channel channel, TerminalOutputParse outputParse, CancellationToken cancellationToken)
     {
         var agent = channel.Value.Agent;
+        var target = channel.Value.Target;
 
-        var target = await AddOrGetTargetAsync(unitOfWork, channel.Value.Target, agent, outputParse, cancellationToken);
         var rootDomain = await AddOrGetRootDomainAsync(unitOfWork, target, channel.Value.RootDomain, agent, outputParse, cancellationToken);
         var subdomain = await AddNewSubdomainAsync(unitOfWork, rootDomain, agent, outputParse, cancellationToken);
 
@@ -102,37 +102,6 @@ public class AgentDataAccessService : IAgentDataAccessService
         }        
 
         await UpdateSubdomainsAsync(unitOfWork, subdomains, agent, outputParse, cancellationToken);
-    }
-
-    /// <summary>
-    /// Add or obtain the target
-    /// </summary>
-    /// <param name="unitOfWork"><see cref="IUnitOfWork"/></param>
-    /// <param name="target">The target</param>
-    /// <param name="agent">The agent</param>
-    /// <param name="outputParse">the output</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>A target</returns>
-    private static async Task<Target?> AddOrGetTargetAsync(IUnitOfWork unitOfWork, Target? target, Agent agent, TerminalOutputParse outputParse, CancellationToken cancellationToken)
-    {
-        if (target == null && await NeedAddNewTargetAsync(unitOfWork, outputParse.Target, cancellationToken))
-        {
-            target = new Target
-            {
-                Name = outputParse.Target,
-                AgentsRanBefore = agent.Name
-            };
-
-            if (!string.IsNullOrEmpty(outputParse.Note))
-            {
-                target.AddNewNote(agent.Name!, outputParse.Note);               
-            }
-
-            unitOfWork.Repository<Target>().Add(target);
-            await unitOfWork.CommitAsync(cancellationToken);
-        }
-
-        return target;
     }
 
     /// <summary>

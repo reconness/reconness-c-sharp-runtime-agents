@@ -101,11 +101,17 @@ public class AgentService : IAgentService
     {
         var concepts = agentRunnerQueue.Channel.Split('_');
 
-        var targetName = concepts[2];
         var agentName = concepts[1];
 
-        var subdomainName = string.Empty;
+        var targetName = string.Empty;
         var rootdomainName = string.Empty;
+        var subdomainName = string.Empty;
+        
+        if (concepts.Length > 2)
+        {
+            targetName = "all".Equals(concepts[2]) ? agentRunnerQueue.Payload : concepts[2];
+        }
+
         if (concepts.Length > 3)
         {
             rootdomainName = "all".Equals(concepts[3]) ? agentRunnerQueue.Payload : concepts[3];

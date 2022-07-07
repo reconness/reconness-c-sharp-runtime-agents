@@ -2,8 +2,6 @@
 
 public class TerminalOutputParse
 {
-    public string? Target { get; set; }
-
     public string? RootDomain { get; set; }
 
     public string? Subdomain { get; set; }

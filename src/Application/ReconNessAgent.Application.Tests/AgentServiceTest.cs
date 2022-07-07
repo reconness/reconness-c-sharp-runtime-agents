@@ -64,7 +64,7 @@ namespace ReconNessAgent.Application.Tests
                     
                            return new TerminalOutputParse { RootDomain = lineInput }; ";
 
-            var agent = await CreateTestAgentAsync(script, "ASN {{target}}");
+            var agent = await CreateTestAgentAsync(script, "ASN {{target}}", "Target");
             var target = await CreateTestTargetAsync();
 
             var channel = $"#20220319.1_{agent.Name}_{target.Name}";
@@ -142,7 +142,7 @@ namespace ReconNessAgent.Application.Tests
                     
                            return new TerminalOutputParse { Subdomain = lineInput }; ";
 
-            var agent = await CreateTestAgentAsync(script, "sublister {{rootdomain}}");
+            var agent = await CreateTestAgentAsync(script, "sublister {{rootdomain}}", "RootDomain");
             var target = await CreateTestTargetAsync();
             var rootDomain = await CreateTestRootDomainAsync(target);
 
@@ -206,8 +206,8 @@ namespace ReconNessAgent.Application.Tests
         /// Test save a data into a subdomain
         /// 
         /// {
-        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
-        ///     "Payload": "www.myrootdomain.com",
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_www.myrootdomain.com",
+        ///     "Payload": "",
         ///     "Command": "ping www.myrootdomain.com"
         /// }
         /// 
@@ -229,18 +229,18 @@ namespace ReconNessAgent.Application.Tests
                             return new TerminalOutputParse();
                             ";
 
-            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}");
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}", "Subdomain");
             var target = await CreateTestTargetAsync();
             var rootDomain = await CreateTestRootDomainAsync(target);
             var subdomain = await CreateTestSubDomainAsync(rootDomain);
 
-            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_all";
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_{subdomain.Name}";
             var agentRunner = await CreateAgentRunner(agent, channel);
 
             const string queueData = @"
             {
               ""Channel"": ""{{channel}}"",
-              ""Payload"": ""{{subdomain}}"",
+              ""Payload"": """",
               ""Command"": ""{{command}}"",
               ""Number"": 5,
               ""ServerNumber"": 1
@@ -300,8 +300,8 @@ namespace ReconNessAgent.Application.Tests
         /// Test save empty data into a subdomain
         /// 
         /// {
-        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
-        ///     "Payload": "www.myrootdomain.com",
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_www.myrootdomain.com"",
+        ///     "Payload": "",
         ///     "Command": "ping www.myrootdomain.com"
         /// }
         /// 
@@ -317,18 +317,18 @@ namespace ReconNessAgent.Application.Tests
                             return new TerminalOutputParse();
                             ";
 
-            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}");
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}", "Subdomain");
             var target = await CreateTestTargetAsync();
             var rootDomain = await CreateTestRootDomainAsync(target);
             var subdomain = await CreateTestSubDomainAsync(rootDomain);
 
-            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_all";
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_{subdomain.Name}";
             var agentRunner = await CreateAgentRunner(agent, channel);
 
             const string queueData = @"
             {
               ""Channel"": ""{{channel}}"",
-              ""Payload"": ""{{subdomain}}"",
+              ""Payload"": """",
               ""Command"": ""{{command}}"",
               ""Number"": 5,
               ""ServerNumber"": 1
@@ -386,8 +386,8 @@ namespace ReconNessAgent.Application.Tests
         /// Test save data into a subdomain, but with bad script
         /// 
         /// {
-        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
-        ///     "Payload": "www.myrootdomain.com",
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_www.myrootdomain.com",
+        ///     "Payload": "",
         ///     "Command": "ping www.myrootdomain.com"
         /// }
         /// 
@@ -405,18 +405,18 @@ namespace ReconNessAgent.Application.Tests
                             return new TerminalOutputParse();
                             ";
 
-            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}");
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}", "Subdomain");
             var target = await CreateTestTargetAsync();
             var rootDomain = await CreateTestRootDomainAsync(target);
             var subdomain = await CreateTestSubDomainAsync(rootDomain);
 
-            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_all";
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_{subdomain.Name}";
             var agentRunner = await CreateAgentRunner(agent, channel);
 
             const string queueData = @"
             {
               ""Channel"": ""{{channel}}"",
-              ""Payload"": ""{{subdomain}}"",
+              ""Payload"": """",
               ""Command"": ""{{command}}"",
               ""Number"": 5,
               ""ServerNumber"": 1
@@ -475,8 +475,8 @@ namespace ReconNessAgent.Application.Tests
         /// Test save empty data into a subdomain but if the terminal return empty, we are not running nothing
         /// 
         /// {
-        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
-        ///     "Payload": "www.myrootdomain.com",
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_www.myrootdomain.com",
+        ///     "Payload": "",
         ///     "Command": "ping www.myrootdomain.com"
         /// }
         /// 
@@ -492,18 +492,18 @@ namespace ReconNessAgent.Application.Tests
                             return new TerminalOutputParse();
                             ";
 
-            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}");
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}", "Subdomain");
             var target = await CreateTestTargetAsync();
             var rootDomain = await CreateTestRootDomainAsync(target);
             var subdomain = await CreateTestSubDomainAsync(rootDomain);
 
-            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_all";
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_{subdomain.Name}";
             var agentRunner = await CreateAgentRunner(agent, channel);
 
             const string queueData = @"
             {
               ""Channel"": ""{{channel}}"",
-              ""Payload"": ""{{subdomain}}"",
+              ""Payload"": """",
               ""Command"": ""{{command}}"",
               ""Number"": 5,
               ""ServerNumber"": 1
@@ -556,13 +556,351 @@ namespace ReconNessAgent.Application.Tests
             agentRunnerCommandOutputSaved.Should().BeNull();
         }
 
-        // TODO: Test the skip part
+        /// <summary>
+        /// Test save but we are skipping it because it run before in that target
+        /// 
+        /// {
+        ///     "Channel": "#20220319.1_TestAgentName_all",
+        ///     "Payload": "TestTargetName",
+        ///     "Command": "NAS TestTargetName"
+        /// }
+        /// 
+        /// Note: We emulate the terminal process returning all the time: "myrootdomain.com""
+        /// 
+        /// </summary>
+        [Fact]
+        public async Task Run_Skip_Target_Command_Async()
+        {
+            // arrange
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;  
+
+                            return new TerminalOutputParse { Rootdomain = lineInput};
+                          ";
+
+            var agent = await CreateTestAgentAsync(script, "NAS {{target}}", "Target", true);
+            var target = await CreateTestTargetAsync(agent.Name!);
+
+            var channel = $"#20220319.1_{agent.Name}_all";
+            var agentRunner = await CreateAgentRunner(agent, channel);
+
+            const string queueData = @"
+            {
+              ""Channel"": ""{{channel}}"",
+              ""Payload"": ""{{target}}"",
+              ""Command"": ""{{command}}"",
+              ""Number"": 5,
+              ""ServerNumber"": 1
+            }";
+
+            bool finished = true;
+            A.CallTo(() => terminalProviderFake.Finished).ReturnsLazily(() =>
+            {
+                finished = !finished;
+                return finished;
+            });
+
+            A.CallTo(() => terminalProviderFake.ReadLineAsync()).Returns("myrootdomain.com");
+
+            var payload = queueData
+                .Replace("{{channel}}", channel)
+                .Replace("{{command}}", agent.Command)
+                .Replace("{{target}}", target.Name);
+
+            // act
+            await agentService.RunAsync(unitOfWork, payload);
+
+            var rootDomainSaved = await unitOfWork.Repository<RootDomain>().GetByCriteriaAsync(a => a.Name == "myrootdomain.com");
+            var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
+            var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
+
+            // cleanup
+            unitOfWork.Repository<Agent>().Delete(agent);
+            unitOfWork.Repository<Target>().Delete(target); // this delete the rootdomain and subdomain on cascade
+            unitOfWork.Repository<AgentRunner>().Delete(agentRunner); // this delete the agentRunnerCommand on cascade
+            await unitOfWork.CommitAsync();
+
+            // assert
+            rootDomainSaved.Should().BeNull();
+
+            agentRunnerSaved.Should().NotBeNull();
+            agentRunnerSaved!.Stage.Should().Be(Domain.Core.Enums.AgentRunnerStage.RUNNING);
+
+            agentRunnerCommandSaved.Should().NotBeNull();
+            agentRunnerCommandSaved!.Status.Should().Be(Domain.Core.Enums.AgentRunnerCommandStatus.SKIPPED);
+            agentRunnerCommandSaved!.Command.Should().Be("NAS TestTargetName");
+            agentRunnerCommandSaved!.Server.Should().Be(1);
+            agentRunnerCommandSaved!.Number.Should().Be(5);
+
+            agentRunnerCommandOutputSaved.Should().BeNull();
+        }
+
+        /// <summary>
+        /// Test save but we are skipping it because it run before in that rootdomain
+        /// 
+        /// {
+        ///     "Channel": "#20220319.1_TestAgentName_TestAgentName_all",
+        ///     "Payload": "myrootdomain.com",
+        ///     "Command": "NAS TestAgentName"
+        /// }
+        /// 
+        /// Note: We emulate the terminal process returning all the time: "www.myrootdomain.com"
+        /// 
+        /// </summary>
+        [Fact]
+        public async Task Run_Skip_Rootdomain_Command_Async()
+        {
+            // arrange
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
+                    
+                           return new TerminalOutputParse { Subdomain = lineInput }; ";
+
+            var agent = await CreateTestAgentAsync(script, "sublister {{rootdomain}}", "RootDomain", true);
+            var target = await CreateTestTargetAsync();
+            var rootDomain = await CreateTestRootDomainAsync(target, agent.Name!);
+
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_all";
+            var agentRunner = await CreateAgentRunner(agent, channel);
+
+            const string queueData = @"
+            {
+              ""Channel"": ""{{channel}}"",
+              ""Payload"": ""{{rootdomain}}"",
+              ""Command"": ""{{command}}"",
+              ""Number"": 5,
+              ""ServerNumber"": 1
+            }";
+
+            bool finished = true;
+            A.CallTo(() => terminalProviderFake.Finished).ReturnsLazily(() =>
+            {
+                finished = !finished;
+                return finished;
+            });
+
+            A.CallTo(() => terminalProviderFake.ReadLineAsync()).Returns("www.myrootdomain.com");
+
+            var payload = queueData
+                .Replace("{{channel}}", channel)
+                .Replace("{{command}}", agent.Command)
+                .Replace("{{rootdomain}}", rootDomain.Name);
+
+            // act
+            await agentService.RunAsync(unitOfWork, payload);
+
+            var subdomain = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
+            var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
+            var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
+
+            // cleanup
+            unitOfWork.Repository<Agent>().Delete(agent);
+            unitOfWork.Repository<Target>().Delete(target); // this delete the rootdomain on cascade
+            unitOfWork.Repository<AgentRunner>().Delete(agentRunner); // this delete the agentRunnerCommand on cascade
+            await unitOfWork.CommitAsync();
+
+            // assert
+            subdomain.Should().BeNull();
+
+            agentRunnerSaved.Should().NotBeNull();
+            agentRunnerSaved!.Stage.Should().Be(Domain.Core.Enums.AgentRunnerStage.RUNNING);
+
+            agentRunnerCommandSaved.Should().NotBeNull();
+            agentRunnerCommandSaved!.Status.Should().Be(Domain.Core.Enums.AgentRunnerCommandStatus.SKIPPED);
+            agentRunnerCommandSaved!.Command.Should().Be("sublister myrootdomain.com");
+            agentRunnerCommandSaved!.Server.Should().Be(1);
+            agentRunnerCommandSaved!.Number.Should().Be(5);
+
+            agentRunnerCommandOutputSaved.Should().BeNull();
+        }
+
+        /// <summary>
+        /// Test save but we are skipping it because it run before in that rootdomain
+        /// 
+        /// {
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_www.myrootdomain.com",
+        ///     "Payload": "",
+        ///     "Command": "ping www.myrootdomain.com"
+        /// }
+        /// 
+        /// Note: We emulate the terminal process returning all the time: "PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data."
+        /// 
+        /// </summary>
+        [Fact]
+        public async Task Run_Skip_Subdomain_Command_Async()
+        {
+            // arrange
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
+                    
+                            var match = System.Text.RegularExpressions.Regex.Match(lineInput, @""PING\s(.*?)\s\((.*?)\)"");
+                            if (match.Success && match.Groups.Count == 3)
+                            {
+                                return new TerminalOutputParse { Ip = match.Groups[2].Value, Subdomain = match.Groups[1].Value };
+                            }
+
+                            return new TerminalOutputParse();
+                            ";
+
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}", "Subdomain", true);
+            var target = await CreateTestTargetAsync();
+            var rootDomain = await CreateTestRootDomainAsync(target);
+            var subdomain = await CreateTestSubDomainAsync(rootDomain, agent.Name!);
+
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_{subdomain.Name}";
+            var agentRunner = await CreateAgentRunner(agent, channel);
+
+            const string queueData = @"
+            {
+              ""Channel"": ""{{channel}}"",
+              ""Payload"": """",
+              ""Command"": ""{{command}}"",
+              ""Number"": 5,
+              ""ServerNumber"": 1
+            }";
+
+            bool finished = true;
+            A.CallTo(() => terminalProviderFake.Finished).ReturnsLazily(() =>
+            {
+                finished = !finished;
+                return finished;
+            });
+
+            A.CallTo(() => terminalProviderFake.ReadLineAsync()).Returns("PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data.");
+
+            var payload = queueData
+                .Replace("{{channel}}", channel)
+                .Replace("{{command}}", agent.Command)
+                .Replace("{{subdomain}}", subdomain.Name);
+
+            // act
+            await agentService.RunAsync(unitOfWork, payload);
+
+            var subdomainSaved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
+            var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
+            var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
+            var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
+
+            // cleanup
+            unitOfWork.Repository<Agent>().Delete(agent);
+            unitOfWork.Repository<Target>().Delete(target); // this delete the rootdomain and subdomain on cascade
+            unitOfWork.Repository<AgentRunner>().Delete(agentRunner); // this delete the agentRunnerCommand on cascade
+            await unitOfWork.CommitAsync();
+
+            // assert
+            subdomainSaved.Should().NotBeNull();
+            subdomainSaved!.IpAddress.Should().BeNullOrEmpty();
+
+            subdomain1Saved.Should().BeNull();
+
+            agentRunnerSaved.Should().NotBeNull();
+            agentRunnerSaved!.Stage.Should().Be(Domain.Core.Enums.AgentRunnerStage.RUNNING);
+
+            agentRunnerCommandSaved.Should().NotBeNull();
+            agentRunnerCommandSaved!.Status.Should().Be(Domain.Core.Enums.AgentRunnerCommandStatus.SKIPPED);
+            agentRunnerCommandSaved!.Command.Should().Be("ping www.myrootdomain.com");
+            agentRunnerCommandSaved!.Server.Should().Be(1);
+            agentRunnerCommandSaved!.Number.Should().Be(5);
+
+            agentRunnerCommandOutputSaved.Should().BeNull();
+        }
+
+        /// <summary>
+        /// Test save but we are skipping it because ...
+        /// 
+        /// {
+        ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_www.myrootdomain.com",
+        ///     "Payload": "",
+        ///     "Command": "ping www.myrootdomain.com"
+        /// }
+        /// 
+        /// Note: We emulate the terminal process returning all the time: "PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data."
+        /// 
+        /// </summary>
+        [Fact]
+        public async Task Run_Skip_Subdomain_Command_Complex_Async()
+        {
+            // arrange
+            var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
+                    
+                            var match = System.Text.RegularExpressions.Regex.Match(lineInput, @""PING\s(.*?)\s\((.*?)\)"");
+                            if (match.Success && match.Groups.Count == 3)
+                            {
+                                return new TerminalOutputParse { Ip = match.Groups[2].Value, Subdomain = match.Groups[1].Value };
+                            }
+
+                            return new TerminalOutputParse();
+                            ";
+
+            var agent = await CreateTestAgentAsync(script, "ping {{subdomain}}", "Subdomain", true);
+            var target = await CreateTestTargetAsync();
+            var rootDomain = await CreateTestRootDomainAsync(target);
+            var subdomain = await CreateTestSubDomainAsync(rootDomain, agent.Name!);
+
+            var channel = $"#20220319.1_{agent.Name}_{target.Name}_{rootDomain.Name}_{subdomain.Name}";
+            var agentRunner = await CreateAgentRunner(agent, channel);
+
+            const string queueData = @"
+            {
+              ""Channel"": ""{{channel}}"",
+              ""Payload"": """",
+              ""Command"": ""{{command}}"",
+              ""Number"": 5,
+              ""ServerNumber"": 1
+            }";
+
+            bool finished = true;
+            A.CallTo(() => terminalProviderFake.Finished).ReturnsLazily(() =>
+            {
+                finished = !finished;
+                return finished;
+            });
+
+            A.CallTo(() => terminalProviderFake.ReadLineAsync()).Returns("PING www1.myrootdomain.com (72.30.35.10) 56 bytes of data.");
+
+            var payload = queueData
+                .Replace("{{channel}}", channel)
+                .Replace("{{command}}", agent.Command)
+                .Replace("{{subdomain}}", subdomain.Name);
+
+            // act
+            await agentService.RunAsync(unitOfWork, payload);
+
+            var subdomainSaved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
+            var subdomain1Saved = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www1.myrootdomain.com");
+            var agentRunnerSaved = await unitOfWork.Repository<AgentRunner>().GetByCriteriaAsync(a => a.Channel == channel);
+            var agentRunnerCommandSaved = await unitOfWork.Repository<AgentRunnerCommand>().GetByCriteriaAsync(a => a.AgentRunnerId == agentRunner.Id);
+            var agentRunnerCommandOutputSaved = await unitOfWork.Repository<AgentRunnerCommandOutput>().GetByCriteriaAsync(a => a.AgentRunnerCommandId == agentRunnerCommandSaved!.Id);
+
+            // cleanup
+            unitOfWork.Repository<Agent>().Delete(agent);
+            unitOfWork.Repository<Target>().Delete(target); // this delete the rootdomain and subdomain on cascade
+            unitOfWork.Repository<AgentRunner>().Delete(agentRunner); // this delete the agentRunnerCommand on cascade
+            await unitOfWork.CommitAsync();
+
+            // assert
+            subdomainSaved.Should().NotBeNull();
+            subdomainSaved!.IpAddress.Should().BeNullOrEmpty();
+
+            subdomain1Saved.Should().BeNull();
+
+            agentRunnerSaved.Should().NotBeNull();
+            agentRunnerSaved!.Stage.Should().Be(Domain.Core.Enums.AgentRunnerStage.RUNNING);
+
+            agentRunnerCommandSaved.Should().NotBeNull();
+            agentRunnerCommandSaved!.Status.Should().Be(Domain.Core.Enums.AgentRunnerCommandStatus.SKIPPED);
+            agentRunnerCommandSaved!.Command.Should().Be("ping www.myrootdomain.com");
+            agentRunnerCommandSaved!.Server.Should().Be(1);
+            agentRunnerCommandSaved!.Number.Should().Be(5);
+
+            agentRunnerCommandOutputSaved.Should().BeNull();
+        }
 
         /// <summary>
         /// Create a mock test agent
         /// </summary>
         /// <returns>The agent</returns>
-        private async Task<Agent> CreateTestAgentAsync(string script, string command)
+        private async Task<Agent> CreateTestAgentAsync(string script, string command, string agentType, bool skip = false)
         {
             var agent = await unitOfWork.Repository<Agent>().GetByCriteriaAsync(a => a.Name == "TestAgentName");
             if (agent != null)
@@ -575,10 +913,17 @@ namespace ReconNessAgent.Application.Tests
             {
                 Name = "TestAgentName",
                 Command = command,
-                AgentType = "RootDomain",
+                AgentType = agentType,
                 Script = script
             };
 
+            if (skip)
+            {
+                agent.AgentTrigger = new AgentTrigger
+                {
+                    SkipIfRunBefore = true
+                };
+            }
             unitOfWork.Repository<Agent>().Add(agent);
             await unitOfWork.CommitAsync();
 
@@ -589,7 +934,7 @@ namespace ReconNessAgent.Application.Tests
         /// Create a mock test target
         /// </summary>
         /// <returns>The target</returns>
-        private async Task<Target> CreateTestTargetAsync()
+        private async Task<Target> CreateTestTargetAsync(string agentName = "")
         {
             var target = await unitOfWork.Repository<Target>().GetByCriteriaAsync(a => a.Name == "TestTargetName");
             if (target != null)
@@ -603,6 +948,11 @@ namespace ReconNessAgent.Application.Tests
                 Name = "TestTargetName"                
             };
 
+            if (!string.IsNullOrEmpty(agentName))
+            {
+                target.AgentsRanBefore = agentName;
+            }
+
             unitOfWork.Repository<Target>().Add(target);
             await unitOfWork.CommitAsync();
 
@@ -614,7 +964,7 @@ namespace ReconNessAgent.Application.Tests
         /// </summary>
         /// <param name="target">The target that has a relation with the new rootdomain</param>
         /// <returns>The rootdomain</returns>
-        private async Task<RootDomain> CreateTestRootDomainAsync(Target target)
+        private async Task<RootDomain> CreateTestRootDomainAsync(Target target, string agentName = "")
         {
             var rootDomain = await unitOfWork.Repository<RootDomain>().GetByCriteriaAsync(a => a.Name == "myrootdomain.com");
             if (rootDomain != null)
@@ -629,6 +979,11 @@ namespace ReconNessAgent.Application.Tests
                 TargetId = target.Id
             };
 
+            if (!string.IsNullOrEmpty(agentName))
+            {
+                rootDomain.AgentsRanBefore = agentName;
+            }
+
             unitOfWork.Repository<RootDomain>().Add(rootDomain);
             await unitOfWork.CommitAsync();
 
@@ -640,7 +995,7 @@ namespace ReconNessAgent.Application.Tests
         /// </summary>
         /// <param name="rootDomain">The rootdomain that has a relation with the new subdomain</param>
         /// <returns>The subdomain</returns>
-        private async Task<Subdomain> CreateTestSubDomainAsync(RootDomain rootDomain)
+        private async Task<Subdomain> CreateTestSubDomainAsync(RootDomain rootDomain, string agentName = "")
         {
             var subdomain = await unitOfWork.Repository<Subdomain>().GetByCriteriaAsync(a => a.Name == "www.myrootdomain.com");
             if (subdomain != null)
@@ -654,6 +1009,11 @@ namespace ReconNessAgent.Application.Tests
                 Name = "www.myrootdomain.com",
                 RootDomainId = rootDomain.Id
             };
+
+            if (!string.IsNullOrEmpty(agentName))
+            {
+                subdomain.AgentsRanBefore = agentName;
+            }
 
             unitOfWork.Repository<Subdomain>().Add(subdomain);
             await unitOfWork.CommitAsync();
