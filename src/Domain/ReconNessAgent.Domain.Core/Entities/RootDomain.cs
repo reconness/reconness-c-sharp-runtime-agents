@@ -29,7 +29,7 @@ public partial class RootDomain : BaseEntity
     /// <returns>If we need to skip this RootDomain</returns>
     public bool CanSkip(AgentTrigger agentTrigger)
     {
-        if (agentTrigger.RootdomainHasBounty && !this.HasBounty)
+        if (agentTrigger.RootdomainHasBounty != null && agentTrigger.RootdomainHasBounty != this.HasBounty)
         {
             return true;
         }

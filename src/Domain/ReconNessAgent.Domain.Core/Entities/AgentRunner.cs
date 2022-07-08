@@ -38,7 +38,7 @@ public partial class AgentRunner : BaseEntity
         var agentTypeRootDomain = "RootDomain".Equals(agent.AgentType);
         var agentTypeSubdomain = "Subdomain".Equals(agent.AgentType);
 
-        return (agentTrigger.SkipIfRunBefore && RanBefore(agent, target, rootDomain, subdomain, agentTypeTarget, agentTypeRootDomain, agentTypeSubdomain)) ||
+        return (agentTrigger.SkipIfRunBefore ?? false && RanBefore(agent, target, rootDomain, subdomain, agentTypeTarget, agentTypeRootDomain, agentTypeSubdomain)) ||
                (agentTypeTarget && target != null && target.CanSkip(agentTrigger)) ||
                (agentTypeRootDomain && rootDomain != null && rootDomain.CanSkip(agentTrigger)) ||
                (agentTypeSubdomain && subdomain != null && subdomain.CanSkip(agentTrigger));

@@ -43,22 +43,22 @@ public partial class Subdomain : BaseEntity
     /// <returns>If we need to skip this Subdomain</returns>
     public bool CanSkip(AgentTrigger agentTrigger)
     {
-        if (agentTrigger.SubdomainHasBounty && (this.HasBounty == null || !this.HasBounty.Value))
+        if (agentTrigger.SubdomainHasBounty != (this.HasBounty ?? false))
         {
             return true;
         }
 
-        if (agentTrigger.SubdomainHasHttpOrHttpsOpen && (this.HasHttpOpen == null || !this.HasHttpOpen.Value))
+        if (agentTrigger.SubdomainHasHttpOrHttpsOpen ?? false && (this.HasHttpOpen == null || !this.HasHttpOpen.Value))
         {
             return true;
         }
 
-        if (agentTrigger.SubdomainIsAlive && (this.IsAlive == null || !this.IsAlive.Value))
+        if (agentTrigger.SubdomainIsAlive ?? false && (this.IsAlive == null || !this.IsAlive.Value))
         {
             return true;
         }
 
-        if (agentTrigger.SubdomainIsMainPortal && (this.IsMainPortal == null || !this.IsMainPortal.Value))
+        if (agentTrigger.SubdomainIsMainPortal ?? false && (this.IsMainPortal == null || !this.IsMainPortal.Value))
         {
             return true;
         }
