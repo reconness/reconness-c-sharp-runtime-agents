@@ -34,7 +34,7 @@ public partial class Target : BaseEntity
     /// <returns>If we need to skip this Target</returns>
     public bool CanSkip(AgentTrigger agentTrigger)
     {
-        if (agentTrigger.TargetHasBounty != null && agentTrigger.TargetHasBounty != this.HasBounty)
+        if ((agentTrigger.TargetHasBounty ?? false) && !this.HasBounty)
         {
             return true;
         }
