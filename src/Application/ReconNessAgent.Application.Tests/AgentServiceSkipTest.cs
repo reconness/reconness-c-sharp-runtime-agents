@@ -1544,7 +1544,8 @@ public class AgentServiceSkipTest
     }
 
     /// <summary>
-    /// Test save a data into a subdomain because, we are include the subdomain name and that has bounty
+    /// Test save a data into a subdomain because, we are include the subdomains that has http open, is main portal and is alive
+    /// we are excluding subdomain that do not have those conditions
     /// 
     /// {
     ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
@@ -1552,11 +1553,17 @@ public class AgentServiceSkipTest
     ///     "Command": "ping www.myrootdomain.com"
     /// }
     /// 
+    /// {
+    ///     "Channel": "#20220319.1_TestAgentName_TestTargetName_myrootdomain.com_all",
+    ///     "Payload": "www.1myrootdomain.com",
+    ///     "Command": "ping www.1myrootdomain.com"
+    /// }
+    /// 
     /// Note: We emulate the terminal process returning all the time: "PING www.myrootdomain1.com (72.30.35.10) 56 bytes of data."
     /// 
     /// </summary>
     [Fact]
-    public async Task Run_Skip_Subdomain_Include_Command_Async()
+    public async Task Run_Skip_Subdomains_Include_Command_Async()
     {
         // arrange
         var script = @"using ReconNessAgent.Domain.Core.ValueObjects;
