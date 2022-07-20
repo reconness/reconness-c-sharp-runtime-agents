@@ -9,7 +9,7 @@ COPY ["Domain/ReconNessAgent.Domain.Core/ReconNessAgent.Domain.Core.csproj", "Do
 COPY ["Application/ReconNessAgent.Application/ReconNessAgent.Application.csproj", "Application/ReconNessAgent.Application/"]
 COPY ["Application/ReconNessAgent.Application.Services/ReconNessAgent.Application.Services.csproj", "Application/ReconNessAgent.Application.Services/"]
 COPY ["Infrastructure/ReconNessAgent.Infrastructure/ReconNessAgent.Infrastructure.csproj", "Infrastructure/ReconNessAgent.Infrastructure/"]
-COPY ["Infrastructure/ReconNessAgent.Infrastructure.Data.Dapper/ReconNessAgent.Infrastructure.Data.Dapper.csproj", "Infrastructure/ReconNessAgent.Infrastructure.Data.Dapper/"]
+COPY ["Infrastructure/ReconNessAgent.Infrastructure.Data.EF/ReconNessAgent.Infrastructure.Data.EF.csproj", "Infrastructure/ReconNessAgent.Infrastructure.Data.EF/"]
 COPY ["Infrastructure/ReconNessAgent.Infrastructure.PubSub/ReconNessAgent.Infrastructure.PubSub.csproj", "Infrastructure/ReconNessAgent.Infrastructure.PubSub/"]
 COPY ["Infrastructure/ReconNessAgent.Infrastructure.Worker/ReconNessAgent.Infrastructure.Worker.csproj", "Infrastructure/ReconNessAgent.Infrastructure.Worker/"]
 RUN dotnet restore "Infrastructure/ReconNessAgent.Infrastructure.Worker/ReconNessAgent.Infrastructure.Worker.csproj"
