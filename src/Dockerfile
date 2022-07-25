@@ -9,8 +9,7 @@ COPY ["Domain/ReconNessAgent.Domain.Core/ReconNessAgent.Domain.Core.csproj", "Do
 COPY ["Application/ReconNessAgent.Application/ReconNessAgent.Application.csproj", "Application/ReconNessAgent.Application/"]
 COPY ["Application/ReconNessAgent.Application.Services/ReconNessAgent.Application.Services.csproj", "Application/ReconNessAgent.Application.Services/"]
 COPY ["Infrastructure/ReconNessAgent.Infrastructure/ReconNessAgent.Infrastructure.csproj", "Infrastructure/ReconNessAgent.Infrastructure/"]
-COPY ["Infrastructure/ReconNessAgent.Infrastructure.Data.EF/ReconNessAgent.Infrastructure.Data.EF.csproj", "Infrastructure/ReconNessAgent.Infrastructure.Data.EF/"]
-COPY ["Infrastructure/ReconNessAgent.Infrastructure.PubSub/ReconNessAgent.Infrastructure.PubSub.csproj", "Infrastructure/ReconNessAgent.Infrastructure.PubSub/"]
+COPY ["Infrastructure/Data/ReconNessAgent.Infrastructure.Data.EF/ReconNessAgent.Infrastructure.Data.EF.csproj", "Infrastructure/Data/ReconNessAgent.Infrastructure.Data.EF/"]
 COPY ["Infrastructure/ReconNessAgent.Infrastructure.Worker/ReconNessAgent.Infrastructure.Worker.csproj", "Infrastructure/ReconNessAgent.Infrastructure.Worker/"]
 RUN dotnet restore "Infrastructure/ReconNessAgent.Infrastructure.Worker/ReconNessAgent.Infrastructure.Worker.csproj"
 COPY . .
@@ -23,4 +22,9 @@ RUN dotnet publish "ReconNessAgent.Infrastructure.Worker.csproj" -c Release -o /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# -------- Agents dependencies -------- 
+
+# -------- End Agents dependencies -------- 
+
 ENTRYPOINT ["dotnet", "ReconNessAgent.Infrastructure.Worker.dll"]

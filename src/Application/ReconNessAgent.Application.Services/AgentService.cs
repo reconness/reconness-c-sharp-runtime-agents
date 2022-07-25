@@ -170,6 +170,8 @@ public class AgentService : IAgentService
         }
         catch (Exception ex)
         {
+            _logger.Error(ex, ex.Message);
+
             agentRunnerCommand.Error = ex.Message;
             agentRunnerCommandStatus = AgentRunnerCommandStatus.FAILED;
         }

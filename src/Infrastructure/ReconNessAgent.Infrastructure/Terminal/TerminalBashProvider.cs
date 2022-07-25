@@ -29,6 +29,8 @@ public class TerminalBashProvider : ITerminalProvider
                 CreateNoWindow = true,
             }
         };
+
+        process.Start();
     }
 
     /// <inheritdoc/>
