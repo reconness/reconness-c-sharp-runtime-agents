@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ReconNessAgent.Infrastructure\ReconNessAgent.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\ReconNessAgent.Infrastructure\ReconNessAgent.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
