@@ -166,6 +166,8 @@ public class AgentService : IAgentService
 
             var scriptEngineProvider = this.scriptEngineProvideFactory.CreateScriptEngineProvider(script);
 
+            await this.agentDataAccessService.SaveAgentRunnerCommandOutputAsync(unitOfWork, agentRunnerCommand, $"[+] Reconness => {agentRunnerCommand.Command}", cancellationToken);
+
             agentRunnerCommandStatus = await RunTerminalAsync(unitOfWork, channel, agentRunnerQueue, agentRunner, agentRunnerCommand, terminalProvider, scriptEngineProvider, cancellationToken);
         }
         catch (Exception ex)
